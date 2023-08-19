@@ -11,14 +11,17 @@ import frc.robot.util.scheduling.SubsystemPriority;
 /** Add your docs here. */
 public class IntakeSubsystem extends LifecycleSubsystem {
   private CANSparkMax motor;
-
+  public IntakeState state;
   public IntakeSubsystem(CANSparkMax motor) {
     super(SubsystemPriority.INTAKE);
     this.motor = motor;
   }
+  public void setState(IntakeState intakeState){
+    state = intakeState;
+  }
 
   @Override
   public void enabledPeriodic() {
-    
+
   }
 }
