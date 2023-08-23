@@ -11,7 +11,7 @@ public enum SubsystemPriority {
 
   SWERVE(10),
   IMU(10),
-
+  INTAKE(10),
   // Run localization after swerve & IMU
   LOCALIZATION(9),
 
