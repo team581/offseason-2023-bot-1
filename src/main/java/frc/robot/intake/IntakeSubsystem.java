@@ -12,6 +12,7 @@ import frc.robot.util.scheduling.SubsystemPriority;
 public class IntakeSubsystem extends LifecycleSubsystem {
   private CANSparkMax motor;
   private IntakeState state;
+  private HeldGamePiece gamePiece = HeldGamePiece.NOTHING;
 
   public IntakeSubsystem(CANSparkMax motor) {
     super(SubsystemPriority.INTAKE);
@@ -26,14 +27,26 @@ public class IntakeSubsystem extends LifecycleSubsystem {
   public void enabledPeriodic() {
     if (state == IntakeState.INTAKE_CUBE) {
       motor.set(0.5);
+      gamePiece = HeldGamePiece.CUBE;
     } else if (state == IntakeState.INTAKE_CONE) {
       motor.set(-1);
+      gamePiece = HeldGamePiece.CONE;
     } else if (state == IntakeState.OUTTAKE_CONE) {
       motor.set(0.4);
+      gamePiece = HeldGamePiece.NOTHING;
     } else if (state == IntakeState.OUTTAKE_CUBE) {
       motor.set(-0.3);
+      gamePiece = HeldGamePiece.NOTHING;
     } else {
       motor.set(0.0);
     }
+  }
+
+  public HeldGamePiece getGamePiece() {
+    return gamePiece;
+  }
+
+  public void setGamePiece(HeldGamePiece gamePiece) {
+    this.gamePiece = gamePiece;
   }
 }
