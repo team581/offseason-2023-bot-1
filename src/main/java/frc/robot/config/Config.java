@@ -7,6 +7,7 @@ package frc.robot.config;
 public class Config {
   public static final String SERIAL_NUMBER = System.getenv("serialnum");
 
+  // TODO: Change this to false during events
   public static final boolean IS_DEVELOPMENT = true;
 
   public static final String CANIVORE_ID = "581CANivore";
