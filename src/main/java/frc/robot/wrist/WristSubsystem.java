@@ -38,13 +38,9 @@ public class WristSubsystem extends LifecycleSubsystem {
     pid.setReference(goalAngle / 360.0, ControlType.kSmartMotion);
   }
 
-  public double set(double angle) {
+  public void set(double angle) {
     goalAngle = angle;
-    return goalAngle;
   }
-
-// create a method set(double angle), which sets the goal angle
-  // update setPositionCommand to use the set() method
 
   public Command setPositionCommand(double angle) {
     return run(() -> {
