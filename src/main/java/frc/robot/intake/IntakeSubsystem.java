@@ -56,7 +56,8 @@ public class IntakeSubsystem extends LifecycleSubsystem {
   public boolean atGoal(IntakeState state) {
     if (goalState != state) {
       return false;
-    }if (state == IntakeState.OUTTAKE_CONE || state == IntakeState.OUTTAKE_CUBE) {
+    }
+    if (state == IntakeState.OUTTAKE_CONE || state == IntakeState.OUTTAKE_CUBE) {
       return gamePiece == HeldGamePiece.NOTHING;
     }
     if (state == IntakeState.STOPPED) {
@@ -69,8 +70,6 @@ public class IntakeSubsystem extends LifecycleSubsystem {
       return gamePiece == HeldGamePiece.CONE;
     }
     return false;
-
-
   }
 
   public HeldGamePiece getGamePiece() {
