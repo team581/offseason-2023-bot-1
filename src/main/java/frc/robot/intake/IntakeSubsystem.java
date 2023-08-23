@@ -11,7 +11,7 @@ import frc.robot.util.scheduling.SubsystemPriority;
 /** Add your docs here. */
 public class IntakeSubsystem extends LifecycleSubsystem {
   private CANSparkMax motor;
-  private IntakeState state;
+  private IntakeState goalState;
   private HeldGamePiece gamePiece = HeldGamePiece.NOTHING;
 
   public IntakeSubsystem(CANSparkMax motor) {
@@ -19,27 +19,58 @@ public class IntakeSubsystem extends LifecycleSubsystem {
     this.motor = motor;
   }
 
-  public void setState(IntakeState intakeState) {
-    state = intakeState;
+  public void setGoalState(IntakeState intakeState) {
+    if (goalState != intakeState) {
+      if (goalState == IntakeState.INTAKE_CONE || goalState == IntakeState.INTAKE_CUBE) {
+        gamePiece = HeldGamePiece.NOTHING;
+      }
+    }
+
+    goalState = intakeState;
   }
 
   @Override
   public void enabledPeriodic() {
-    if (state == IntakeState.INTAKE_CUBE) {
-      motor.set(0.5);
-      gamePiece = HeldGamePiece.CUBE;
-    } else if (state == IntakeState.INTAKE_CONE) {
-      motor.set(-1);
-      gamePiece = HeldGamePiece.CONE;
-    } else if (state == IntakeState.OUTTAKE_CONE) {
+    if (goalState == IntakeState.OUTTAKE_CONE) {
       motor.set(0.4);
-      gamePiece = HeldGamePiece.NOTHING;
-    } else if (state == IntakeState.OUTTAKE_CUBE) {
+      // gamePiece = HeldGamePiece.NOTHING;
+    } else if (goalState == IntakeState.OUTTAKE_CUBE) {
       motor.set(-0.3);
-      gamePiece = HeldGamePiece.NOTHING;
+      // gamePiece = HeldGamePiece.NOTHING;
+    } else if (gamePiece == HeldGamePiece.CUBE) {
+      motor.set(0.15);
+    } else if (gamePiece == HeldGamePiece.CONE) {
+      motor.set(-0.1);
+    } else if (goalState == IntakeState.INTAKE_CUBE) {
+      motor.set(0.5);
+      // gamePiece = HeldGamePiece.CUBE;
+    } else if (goalState == IntakeState.INTAKE_CONE) {
+      motor.set(-1);
+      // gamePiece = HeldGamePiece.CONE;
     } else {
-      motor.set(0.0);
+      motor.disable();
     }
+  }
+
+  // create an atGoal(IntakeMode mode) method
+  public boolean atGoal(IntakeState state) {
+    if (goalState != state) {
+      return false;
+    }if (state == IntakeState.OUTTAKE_CONE || state == IntakeState.OUTTAKE_CUBE) {
+      return gamePiece == HeldGamePiece.NOTHING;
+    }
+    if (state == IntakeState.STOPPED) {
+      return true;
+    }
+    if (state == IntakeState.INTAKE_CUBE) {
+      return gamePiece == HeldGamePiece.CUBE;
+    }
+    if (state == IntakeState.INTAKE_CONE) {
+      return gamePiece == HeldGamePiece.CONE;
+    }
+    return false;
+
+
   }
 
   public HeldGamePiece getGamePiece() {
