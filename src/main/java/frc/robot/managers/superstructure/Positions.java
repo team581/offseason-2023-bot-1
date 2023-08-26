@@ -7,7 +7,7 @@ package frc.robot.managers.superstructure;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 public class Positions {
-  public static final SuperstructurePosition STOWED = new SuperstructurePosition(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)):
+  public static final SuperstructurePosition STOWED = new SuperstructurePosition(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0));
 
   public static final SuperstructurePosition INTAKING_CUBE_FLOOR = new SuperstructurePosition(Rotation2d.fromDegrees(20), Rotation2d.fromDegrees(135));
   public static final SuperstructurePosition INTAKING_CUBE_SHELF =  new SuperstructurePosition(Rotation2d.fromDegrees(90), Rotation2d.fromDegrees(180));

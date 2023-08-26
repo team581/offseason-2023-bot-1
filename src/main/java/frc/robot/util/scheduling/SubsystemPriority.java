@@ -5,6 +5,9 @@
 package frc.robot.util.scheduling;
 
 public enum SubsystemPriority {
+  SUPERSTRUCTURE_MANAGER(21),
+  SUPERSTRUCTURE_MOTION_MANAGER(20),
+
   // Run autobalance and autorotate before swerve
   AUTOBALANCE(11),
   AUTOROTATE(11),
@@ -13,6 +16,7 @@ public enum SubsystemPriority {
   SWERVE(10),
   IMU(10),
   INTAKE(10),
+  SHOULDER(10),
   // Run localization after swerve & IMU
   LOCALIZATION(9),
 

@@ -1,37 +1,49 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
 package frc.robot.managers.superstructure;
 
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.intake.IntakeSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystem;
+import frc.robot.util.scheduling.SubsystemPriority;
+import frc.robot.wrist.WristSubsystem;
 
 public class SuperstructureManager extends LifecycleSubsystem {
   private SuperstructureMotionManager motionManager;
-  private ShoulderSubsystem shoulder;
+  private WristSubsystem shoulder;
   private WristSubsystem wrist;
   private IntakeSubsystem intake;
-  private SuperstructurePosition goalPosition;
+  private SuperstructureState goalState;
 
-  public SuperstructureManager (SuperstructureMotionManager motionManager, ShoulderSubsystem shoulder, WristSubsystem wrist, IntakeSubsystem intake) {
+  public SuperstructureManager(SuperstructureMotionManager motionManager, IntakeSubsystem intake) {
+    super(SubsystemPriority.SUPERSTRUCTURE_MANAGER);
+
     this.motionManager = motionManager;
-    this.shoulder = shoulder;
-    this.wrist = wrist;
+    this.shoulder = motionManager.shoulder;
+    this.wrist = motionManager.wrist;
     this.intake = intake;
   }
 
-// create a setGoal method - you give it a position, it returns void
-private void setGoal(SuperstructurePosition goalPosition) {
-  this.goalPosition = goalPosition;
-}
+  private void setGoal(SuperstructureState goalState) {
+    this.goalState = goalState;
+  }
 
-// create an atGoal() method
-public boolean atGoal(Rotation2d shoulderAngle, Rotation2d wristAngle) {
-  return shoulderAngle == goalPosition.shoulderAngle && wristAngle == goalPosition.wristAngle;
-}
+  public boolean atGoal(SuperstructureState state) {
+    return shoulder.atAngle(state.position.shoulderAngle.getDegrees())
+        && wrist.atAngle(state.position.wristAngle.getDegrees());
+  }
 
-// in enabledperiodic, go to the goal position
-@Override
-public void enabledPeriodic() {
-  motionmanager.set
-}
-  // create a setPositionCommand method, which finishes once at goal
+  // in enabledperiodic, go to the goal position
+  @Override
+  public void enabledPeriodic() {
+    motionManager.set(goalState.position);
+  }
+
+  public Command setStateCommand(SuperstructureState newGoalState) {
+    return Commands.runOnce(() -> setGoal(newGoalState))
+        .andThen(Commands.waitUntil(() -> atGoal(newGoalState)));
+  }
 }
