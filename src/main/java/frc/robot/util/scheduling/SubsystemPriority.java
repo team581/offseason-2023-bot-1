@@ -9,6 +9,7 @@ public enum SubsystemPriority {
   AUTOBALANCE(11),
   AUTOROTATE(11),
 
+  WRIST(10),
   SWERVE(10),
   IMU(10),
   INTAKE(10),
