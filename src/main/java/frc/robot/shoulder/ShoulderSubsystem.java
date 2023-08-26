@@ -3,20 +3,24 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
 
 public class ShoulderSubsystem extends LifecycleSubsystem {
   private final CANSparkMax motor;
+  private final CANSparkMax motorFollower;
+
   private RelativeEncoder encoder;
   private SparkMaxPIDController pid;
   private double goalAngle = 0.0;
 
-  public ShoulderSubsystem(CANSparkMax motor) {
+  public ShoulderSubsystem(CANSparkMax motor, CANSparkMax motorFollower) {
     super(SubsystemPriority.SHOULDER);
-
     this.motor = motor;
+    this.motorFollower = motorFollower;
+    motorFollower.follow(motor);
     encoder = motor.getEncoder();
     pid = motor.getPIDController();
 
