@@ -16,7 +16,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
   private WristSubsystem shoulder;
   private WristSubsystem wrist;
   private IntakeSubsystem intake;
-  private SuperstructurePosition goalPosition;
+  private SuperstructureState goalState;
 
   public SuperstructureManager(SuperstructureMotionManager motionManager, IntakeSubsystem intake) {
     super(SubsystemPriority.SUPERSTRUCTURE_MANAGER);
@@ -27,24 +27,23 @@ public class SuperstructureManager extends LifecycleSubsystem {
     this.intake = intake;
   }
 
-  private void setGoal(SuperstructurePosition goalPosition) {
-    this.goalPosition = goalPosition;
+  private void setGoal(SuperstructureState goalState) {
+    this.goalState = goalState;
   }
 
-  public boolean atPosition(SuperstructurePosition position) {
-    return shoulder.atAngle(position.shoulderAngle.getDegrees())
-        && wrist.atAngle(position.wristAngle.getDegrees());
+  public boolean atGoal(SuperstructureState state) {
+    return shoulder.atAngle(state.position.shoulderAngle.getDegrees())
+        && wrist.atAngle(state.position.wristAngle.getDegrees());
   }
 
   // in enabledperiodic, go to the goal position
   @Override
   public void enabledPeriodic() {
-    motionManager.set(goalPosition);
+    motionManager.set(goalState.position);
   }
 
-  // create a setPositionCommand method, which finishes once at goal
-  public Command setGoalCommand(SuperstructurePosition newGoalPosition) {
-    return Commands.runOnce(() -> setGoal(newGoalPosition))
-        .andThen(Commands.waitUntil(() -> atPosition(newGoalPosition)));
+  public Command setStateCommand(SuperstructureState newGoalState) {
+    return Commands.runOnce(() -> setGoal(newGoalState))
+        .andThen(Commands.waitUntil(() -> atGoal(newGoalState)));
   }
 }
