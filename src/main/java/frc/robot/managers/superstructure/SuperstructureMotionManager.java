@@ -1,24 +1,59 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
 package frc.robot.managers.superstructure;
 
 import frc.robot.util.scheduling.LifecycleSubsystem;
+import frc.robot.util.scheduling.SubsystemPriority;
+import frc.robot.wrist.WristSubsystem;
+import java.util.ArrayList;
 
 public class SuperstructureMotionManager extends LifecycleSubsystem {
-  private ShoulderSubsystem shoulder;
-  private WristSubsystem wrist;
+  public final WristSubsystem shoulder;
+  public final WristSubsystem wrist;
   private SuperstructurePosition currentPoint = Positions.STOWED;
   private SuperstructurePosition goalPosition = Positions.STOWED;
+  private final ArrayList<SuperstructurePosition> positionList =
+      new ArrayList<SuperstructurePosition>();
 
-  public SuperstructureMotionManager (ShoulderSubsystem shoulder, WristSubsystem wrist) {
+  public SuperstructureMotionManager(WristSubsystem shoulder, WristSubsystem wrist) {
+    super(SubsystemPriority.SUPERSTRUCTURE_MOTION_MANAGER);
+
     this.shoulder = shoulder;
     this.wrist = wrist;
   }
 
-  public void set(SuperstructurePosition position) {
+  private boolean atPosition(SuperstructurePosition position) {
+    return shoulder.atAngle(position.shoulderAngle.getDegrees())
+        && wrist.atAngle(position.wristAngle.getDegrees());
+  }
+
+  public void set(SuperstructurePosition newGoalPosition) {
+    if (!newGoalPosition.equals(goalPosition)) {
+      positionList.clear();
+      positionList.add(
+          new SuperstructurePosition(currentPoint.shoulderAngle, Positions.STOWED.wristAngle));
+      positionList.add(
+          new SuperstructurePosition(newGoalPosition.shoulderAngle, Positions.STOWED.wristAngle));
+      positionList.add(newGoalPosition);
+
+      goalPosition = newGoalPosition;
+    }
   }
 
   @Override
-  public void enabledperiodic() {
-      shoulder.setAngle(currentpoint.shoulderAngle);
-      wrist.setAngle(currentpoint.wristAngle);
+  public void enabledInit() {
+    positionList.clear();
+  }
+
+  @Override
+  public void enabledPeriodic() {
+    if (atPosition(currentPoint) && !positionList.isEmpty()) {
+      currentPoint = positionList.remove(0);
+    }
+
+    shoulder.set(currentPoint.shoulderAngle.getDegrees());
+    wrist.set(currentPoint.wristAngle.getDegrees());
   }
 }

@@ -5,9 +5,8 @@
 package frc.robot.managers.superstructure;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.robot.util.scheduling.LifecycleSubsystem;
 
-public class SuperstructurePosition extends LifecycleSubsystem {
+public class SuperstructurePosition {
   public final Rotation2d shoulderAngle;
   public final Rotation2d wristAngle;
 
@@ -15,5 +14,15 @@ public class SuperstructurePosition extends LifecycleSubsystem {
     this.shoulderAngle = shoulderAngle;
     this.wristAngle = wristAngle;
   }
-}
 
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof SuperstructurePosition) {
+      SuperstructurePosition position = (SuperstructurePosition) obj;
+
+      return shoulderAngle.equals(position.shoulderAngle) && wristAngle.equals(position.wristAngle);
+    }
+
+    return false;
+  }
+}
