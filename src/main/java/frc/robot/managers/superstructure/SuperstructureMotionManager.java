@@ -13,7 +13,8 @@ public class SuperstructureMotionManager extends LifecycleSubsystem {
     this.wrist = wrist;
   }
 
-  //add collision avoidance when robot is finished
+  public void set(SuperstructurePosition position) {
+  }
 
   @Override
   public void enabledperiodic() {
