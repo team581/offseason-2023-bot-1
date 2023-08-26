@@ -27,6 +27,8 @@ public class ShoulderSubsystem extends LifecycleSubsystem {
     motorFollower.follow(motor);
     encoder = motor.getEncoder();
     pid = motor.getPIDController();
+    motor.setSmartCurrentLimit(35);
+    motorFollower.setSmartCurrentLimit(35);
 
     pid.setP(5);
     pid.setI(0);
