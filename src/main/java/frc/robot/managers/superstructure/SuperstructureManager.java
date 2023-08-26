@@ -32,14 +32,16 @@ public class SuperstructureManager extends LifecycleSubsystem {
   }
 
   public boolean atGoal(SuperstructureState state) {
-    return shoulder.atAngle(state.position.shoulderAngle.getDegrees())
-        && wrist.atAngle(state.position.wristAngle.getDegrees());
+    return motionManager.atPosition(state.position) && intake.atGoal(state.intakeState);
   }
 
-  // in enabledperiodic, go to the goal position
   @Override
   public void enabledPeriodic() {
     motionManager.set(goalState.position);
+
+    if (motionManager.atPosition(goalState.position) || goalState.intakeNow) {
+      intake.setGoalState(goalState.intakeState);
+    }
   }
 
   public Command setStateCommand(SuperstructureState newGoalState) {

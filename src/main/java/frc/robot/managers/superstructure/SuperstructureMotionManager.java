@@ -24,7 +24,7 @@ public class SuperstructureMotionManager extends LifecycleSubsystem {
     this.wrist = wrist;
   }
 
-  private boolean atPosition(SuperstructurePosition position) {
+  public boolean atPosition(SuperstructurePosition position) {
     return shoulder.atAngle(position.shoulderAngle)
         && wrist.atAngle(position.wristAngle);
   }

@@ -34,9 +34,11 @@ public class Robot extends LoggedRobot {
 
   private final DriveController driveController = new DriveController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
-  private final RumbleControllerSubsystem rumbleController = new RumbleControllerSubsystem(new XboxController(1));
+  private final RumbleControllerSubsystem rumbleController =
+      new RumbleControllerSubsystem(new XboxController(1));
 
   private final FmsSubsystem fmsSubsystem = new FmsSubsystem();
+  // TODO: Add all the subsystems & managers here
 
   private final Autos autos = new Autos();
 
@@ -44,7 +46,7 @@ public class Robot extends LoggedRobot {
 
   public Robot() {
 
-    //XboxController.x().onTrue(wrist.setPositionCommand(10));
+    // TODO: Start adding button bindings
 
     // Log to a USB stick
     Logger.getInstance().addDataReceiver(new WPILOGWriter("/media/sda1/"));

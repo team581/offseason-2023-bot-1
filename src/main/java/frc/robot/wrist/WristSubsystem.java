@@ -57,7 +57,7 @@ public class WristSubsystem extends LifecycleSubsystem {
         .until(() -> atAngle(angle));
   }
 
-  private boolean atAngle(Rotation2d angle) {
+  public boolean atAngle(Rotation2d angle) {
     double actualAngle = getWristAngle().getDegrees();
     return Math.abs(actualAngle - angle.getDegrees()) < 1;
   }

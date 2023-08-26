@@ -8,13 +8,13 @@ import frc.robot.intake.IntakeState;
 
 public class SuperstructureState {
   public final SuperstructurePosition position;
-  public final IntakeState intakeMode;
+  public final IntakeState intakeState;
   public final boolean intakeNow;
 
   public SuperstructureState(
       SuperstructurePosition position, IntakeState intakeMode, boolean intakeNow) {
     this.position = position;
-    this.intakeMode = intakeMode;
+    this.intakeState = intakeMode;
     this.intakeNow = intakeNow;
   }
 
