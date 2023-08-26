@@ -1,4 +1,6 @@
 package frc.robot.wrist;
+import org.littletonrobotics.junction.Logger;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.RelativeEncoder;
@@ -33,6 +35,15 @@ public class WristSubsystem extends LifecycleSubsystem {
   @Override
   public void enabledPeriodic() {
     pid.setReference(goalAngle.getRotations(), ControlType.kSmartMotion);
+  }
+
+  @Override
+  public void robotPeriodic() {
+    Logger.getInstance().recordOutput("Wrist/Velocity", encoder.getVelocity());
+    Logger.getInstance().recordOutput("Wrist/Angle", getWristAngle().getDegrees());
+    Logger.getInstance().recordOutput("Wrist/GoalAngle", goalAngle.getDegrees());
+    Logger.getInstance().recordOutput("Wrist/DutyCycleOutput", motor.getAppliedOutput());
+    Logger.getInstance().recordOutput("Wrist/StatorCurrent", motor.getOutputCurrent());
   }
 
   public void set(Rotation2d angle) {
