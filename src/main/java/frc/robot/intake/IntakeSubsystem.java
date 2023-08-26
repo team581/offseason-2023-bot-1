@@ -7,6 +7,7 @@ package frc.robot.intake;
 import com.revrobotics.*;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
+import org.littletonrobotics.junction.Logger;
 
 /** Add your docs here. */
 public class IntakeSubsystem extends LifecycleSubsystem {
@@ -27,6 +28,14 @@ public class IntakeSubsystem extends LifecycleSubsystem {
     }
 
     goalState = intakeState;
+  }
+@Override
+  public void robotPeriodic() {
+    Logger.getInstance().recordOutput("Intake/State", goalState.toString());
+    Logger.getInstance().recordOutput("Intake/HeldGamePiece", gamePiece.toString());
+    Logger.getInstance().recordOutput("Intake/Current", motor.getOutputCurrent());
+    Logger.getInstance().recordOutput("Intake/DutyCycleOutput", motor.getAppliedOutput());
+    Logger.getInstance().recordOutput("Intake/Velocity", motor.getEncoder().getVelocity());
   }
 
   @Override
