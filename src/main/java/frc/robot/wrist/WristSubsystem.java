@@ -19,7 +19,7 @@ public class WristSubsystem extends LifecycleSubsystem {
     this.motor = motor;
     encoder = motor.getEncoder();
     pid = motor.getPIDController();
-
+    motor.setSmartCurrentLimit(35);
     pid.setP(5);
     pid.setI(0);
     pid.setD(0);
