@@ -1,8 +1,10 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
 package frc.robot.lights;
 
-
 import com.ctre.phoenix.led.CANdle;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
@@ -15,11 +17,10 @@ import frc.robot.managers.superstructure.SuperstructureManager;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
 
-public class LightsSubsystem extends LifecycleSubsystem{
+public class LightsSubsystem extends LifecycleSubsystem {
 
   private static final double FAST_BLINK_DURATION = 0.08;
   private static final double SLOW_BLINK_DURATION = 0.25;
-
 
   private final CANdle candle;
   private final IntakeSubsystem intake;
@@ -31,16 +32,14 @@ public class LightsSubsystem extends LifecycleSubsystem{
   private BlinkPattern blinkPattern = BlinkPattern.SOLID;
 
   public LightsSubsystem(
-    CANdle candle,
-    IntakeSubsystem intake,
-    SuperstructureManager superstructure
-  ) {
+      CANdle candle, IntakeSubsystem intake, SuperstructureManager superstructure) {
     super(SubsystemPriority.LIGHTS);
     this.candle = candle;
     this.intake = intake;
     this.superstructure = superstructure;
   }
-  public void enabledPeriodic(){
+
+  public void enabledPeriodic() {
     HeldGamePiece gamePiece = intake.getGamePiece();
     IntakeState intakeMode = intake.getIntakeState();
     HeldGamePiece superstructureMode = superstructure.getMode();
@@ -53,7 +52,7 @@ public class LightsSubsystem extends LifecycleSubsystem{
         color = Color.kBlue;
         blinkPattern = BlinkPattern.SOLID;
       }
-    }else if (gamePiece == HeldGamePiece.CUBE) {
+    } else if (gamePiece == HeldGamePiece.CUBE) {
       if (intakeMode == IntakeState.INTAKE_CUBE) {
         color = Color.kPurple;
         blinkPattern = BlinkPattern.BLINK_FAST;
@@ -103,10 +102,5 @@ public class LightsSubsystem extends LifecycleSubsystem{
         candle.setLEDs(color8Bit.red, color8Bit.green, color8Bit.blue);
       }
     }
-
-
   }
-
-
-
 }

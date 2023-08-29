@@ -1,16 +1,18 @@
-package frc.robot.shoulder;
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
 
-import org.littletonrobotics.junction.Logger;
+package frc.robot.shoulder;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
+import org.littletonrobotics.junction.Logger;
 
 public class ShoulderSubsystem extends LifecycleSubsystem {
   private final CANSparkMax motor;
@@ -43,22 +45,24 @@ public class ShoulderSubsystem extends LifecycleSubsystem {
     pid.setReference(goalAngle.getRotations(), ControlType.kSmartMotion);
   }
 
-@Override
-public void robotPeriodic(){
-  Logger.getInstance().recordOutput("Shoulder/MainMotor/Velocity", encoder.getVelocity());
-  Logger.getInstance().recordOutput("Shoulder/FollowerMotor/Velocity", encoder.getVelocity());
-  Logger.getInstance().recordOutput("Shoulder/MainMotor/Angle", getWristAngle().getDegrees());
-  Logger.getInstance().recordOutput("Shoulder/FollowerMotor/Angle", getWristAngle().getDegrees());
-  Logger.getInstance().recordOutput("Shoulder/MainMotor/GoalAngle", goalAngle.getDegrees());
-  Logger.getInstance().recordOutput("Shoulder/FollowerMotor/GoalAngle", goalAngle.getDegrees());
-  Logger.getInstance().recordOutput("Shoulder/MainMotor/DutyCycleOutput", motor.getAppliedOutput());
-  Logger.getInstance().recordOutput("Shoulder/FollowerMotor/DutyCycleOutput", motor.getAppliedOutput());
-  Logger.getInstance().recordOutput("Shoulder/MainMotor/StatorCurrent", motor.getOutputCurrent());
-  Logger.getInstance().recordOutput("Shoulder/FollowerMotor/StatorCurrent", motor.getOutputCurrent());
+  @Override
+  public void robotPeriodic() {
+    Logger.getInstance().recordOutput("Shoulder/MainMotor/Velocity", encoder.getVelocity());
+    Logger.getInstance().recordOutput("Shoulder/FollowerMotor/Velocity", encoder.getVelocity());
+    Logger.getInstance().recordOutput("Shoulder/MainMotor/Angle", getWristAngle().getDegrees());
+    Logger.getInstance().recordOutput("Shoulder/FollowerMotor/Angle", getWristAngle().getDegrees());
+    Logger.getInstance().recordOutput("Shoulder/MainMotor/GoalAngle", goalAngle.getDegrees());
+    Logger.getInstance().recordOutput("Shoulder/FollowerMotor/GoalAngle", goalAngle.getDegrees());
+    Logger.getInstance()
+        .recordOutput("Shoulder/MainMotor/DutyCycleOutput", motor.getAppliedOutput());
+    Logger.getInstance()
+        .recordOutput("Shoulder/FollowerMotor/DutyCycleOutput", motor.getAppliedOutput());
+    Logger.getInstance().recordOutput("Shoulder/MainMotor/StatorCurrent", motor.getOutputCurrent());
+    Logger.getInstance()
+        .recordOutput("Shoulder/FollowerMotor/StatorCurrent", motor.getOutputCurrent());
+  }
 
-}
-
-public void set(Rotation2d angle) {
+  public void set(Rotation2d angle) {
     goalAngle = angle;
   }
 
@@ -78,4 +82,3 @@ public void set(Rotation2d angle) {
     return Rotation2d.fromRotations(encoder.getPosition());
   }
 }
-

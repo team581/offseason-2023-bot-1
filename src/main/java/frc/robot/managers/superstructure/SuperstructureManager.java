@@ -55,7 +55,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
     this.mode = mode;
   }
 
-  public HeldGamePiece getMode(){
+  public HeldGamePiece getMode() {
     return mode;
   }
 }
