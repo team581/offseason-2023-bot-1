@@ -5,7 +5,6 @@
 package frc.robot.intake;
 
 import com.revrobotics.*;
-
 import edu.wpi.first.math.filter.LinearFilter;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
@@ -15,12 +14,12 @@ import org.littletonrobotics.junction.Logger;
 public class IntakeSubsystem extends LifecycleSubsystem {
   private final LinearFilter voltageFilter = LinearFilter.movingAverage(7);
   private final LinearFilter velocityFilter = LinearFilter.movingAverage(7);
-  //7 is a placeholder not tuned
+  // 7 is a placeholder not tuned
   private final CANSparkMax motor;
   private final RelativeEncoder encoder;
   private IntakeState goalState;
   private HeldGamePiece gamePiece = HeldGamePiece.NOTHING;
-  
+
   public IntakeSubsystem(CANSparkMax motor) {
     super(SubsystemPriority.INTAKE);
     this.motor = motor;
@@ -36,7 +35,8 @@ public class IntakeSubsystem extends LifecycleSubsystem {
 
     goalState = intakeState;
   }
-@Override
+
+  @Override
   public void robotPeriodic() {
     Logger.getInstance().recordOutput("Intake/State", goalState.toString());
     Logger.getInstance().recordOutput("Intake/HeldGamePiece", gamePiece.toString());
@@ -66,15 +66,20 @@ public class IntakeSubsystem extends LifecycleSubsystem {
     // Game piece detection
     double motorVelocity = velocityFilter.calculate(encoder.getVelocity());
     double intakeVoltage = voltageFilter.calculate(motor.getAppliedOutput()) * 12.0;
-    double theoreticalSpeed = intakeVoltage * (5700.0/12.0); //Neo Max is 5700
-    double threshold = theoreticalSpeed * 0.5; 
+    double theoreticalSpeed = intakeVoltage * (5700.0 / 12.0); // Neo Max is 5700
+    double threshold = theoreticalSpeed * 0.5;
     if (motorVelocity < threshold && goalState == IntakeState.INTAKE_CONE) {
       gamePiece = HeldGamePiece.CONE;
     } else if (motorVelocity < threshold && goalState == IntakeState.INTAKE_CUBE) {
       gamePiece = HeldGamePiece.CUBE;
-    } else if (motorVelocity > threshold && (goalState == IntakeState.OUTTAKE_CONE || goalState == IntakeState.OUTTAKE_CUBE)) {
+    } else if (motorVelocity > threshold
+        && (goalState == IntakeState.OUTTAKE_CONE || goalState == IntakeState.OUTTAKE_CUBE)) {
       gamePiece = HeldGamePiece.NOTHING;
     }
+  }
+
+  public IntakeState getIntakeState() {
+    return goalState;
   }
 
   public boolean atGoal(IntakeState state) {

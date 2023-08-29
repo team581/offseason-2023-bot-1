@@ -6,6 +6,7 @@ package frc.robot.managers.superstructure;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.intake.HeldGamePiece;
 import frc.robot.intake.IntakeSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
@@ -17,6 +18,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
   private WristSubsystem wrist;
   private IntakeSubsystem intake;
   private SuperstructureState goalState;
+  private HeldGamePiece mode = HeldGamePiece.CUBE;
 
   public SuperstructureManager(SuperstructureMotionManager motionManager, IntakeSubsystem intake) {
     super(SubsystemPriority.SUPERSTRUCTURE_MANAGER);
@@ -47,5 +49,13 @@ public class SuperstructureManager extends LifecycleSubsystem {
   public Command setStateCommand(SuperstructureState newGoalState) {
     return Commands.runOnce(() -> setGoal(newGoalState))
         .andThen(Commands.waitUntil(() -> atGoal(newGoalState)));
+  }
+
+  public void setMode(HeldGamePiece mode) {
+    this.mode = mode;
+  }
+
+  public HeldGamePiece getMode() {
+    return mode;
   }
 }
