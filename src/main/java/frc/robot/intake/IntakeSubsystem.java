@@ -20,7 +20,7 @@ public class IntakeSubsystem extends LifecycleSubsystem {
   private final RelativeEncoder encoder;
   private IntakeState goalState;
   private HeldGamePiece gamePiece = HeldGamePiece.NOTHING;
-  
+
   public IntakeSubsystem(CANSparkMax motor) {
     super(SubsystemPriority.INTAKE);
     this.motor = motor;
@@ -67,7 +67,7 @@ public class IntakeSubsystem extends LifecycleSubsystem {
     double motorVelocity = velocityFilter.calculate(encoder.getVelocity());
     double intakeVoltage = voltageFilter.calculate(motor.getAppliedOutput()) * 12.0;
     double theoreticalSpeed = intakeVoltage * (5700.0/12.0); //Neo Max is 5700
-    double threshold = theoreticalSpeed * 0.5; 
+    double threshold = theoreticalSpeed * 0.5;
     if (motorVelocity < threshold && goalState == IntakeState.INTAKE_CONE) {
       gamePiece = HeldGamePiece.CONE;
     } else if (motorVelocity < threshold && goalState == IntakeState.INTAKE_CUBE) {
@@ -75,6 +75,10 @@ public class IntakeSubsystem extends LifecycleSubsystem {
     } else if (motorVelocity > threshold && (goalState == IntakeState.OUTTAKE_CONE || goalState == IntakeState.OUTTAKE_CUBE)) {
       gamePiece = HeldGamePiece.NOTHING;
     }
+  }
+
+  public IntakeState getIntakeState(){
+    return goalState;
   }
 
   public boolean atGoal(IntakeState state) {

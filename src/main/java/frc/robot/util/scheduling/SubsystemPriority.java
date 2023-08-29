@@ -21,6 +21,7 @@ public enum SubsystemPriority {
   LOCALIZATION(9),
 
   FMS(0),
+  LIGHTS(0),
   RUMBLE_CONTROLLER(0);
 
   final int value;
