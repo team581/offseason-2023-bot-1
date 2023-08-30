@@ -16,7 +16,6 @@ import frc.robot.controller.DriveController;
 import frc.robot.controller.RumbleControllerSubsystem;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.generated.BuildConstants;
-import frc.robot.intake.IntakeState;
 import frc.robot.intake.IntakeSubsystem;
 import frc.robot.managers.superstructure.SuperstructureManager;
 import frc.robot.managers.superstructure.SuperstructureMotionManager;
