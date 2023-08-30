@@ -16,11 +16,21 @@ import frc.robot.controller.DriveController;
 import frc.robot.controller.RumbleControllerSubsystem;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.generated.BuildConstants;
+import frc.robot.intake.IntakeState;
+import frc.robot.intake.IntakeSubsystem;
+import frc.robot.managers.superstructure.SuperstructureManager;
+import frc.robot.managers.superstructure.SuperstructureMotionManager;
+import frc.robot.shoulder.ShoulderSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystemManager;
+import frc.robot.wrist.WristSubsystem;
+
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -42,12 +52,15 @@ public class Robot extends LoggedRobot {
 
   private final Autos autos = new Autos();
 
+  private final ShoulderSubsystem shoulder = new ShoulderSubsystem(new CANSparkMax(-1, MotorType.kBrushless), new CANSparkMax(-1, MotorType.kBrushless));
+  private final WristSubsystem wrist = new WristSubsystem(new CANSparkMax(-1, MotorType.kBrushless));
+  private final IntakeSubsystem intake = new IntakeSubsystem(new CANSparkMax(-1, MotorType.kBrushless));
+  private final SuperstructureMotionManager motionManager = new SuperstructureMotionManager(shoulder, wrist);
+  private final SuperstructureManager superstructureManager = new SuperstructureManager(motionManager, intake);
+
   private Command autoCommand;
 
   public Robot() {
-
-    // TODO: Start adding button bindings
-
     // Log to a USB stick
     Logger.getInstance().addDataReceiver(new WPILOGWriter("/media/sda1/"));
     if (Config.IS_DEVELOPMENT) {
@@ -92,7 +105,19 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotInit() {}
 
-  private void configureButtonBindings() {}
+  private void configureButtonBindings() {
+    // TODO: Start adding button bindings
+
+    //Driver controls
+
+    //Floor intake
+    //driveController.leftTrigger(0.3).onTrue();
+
+    //Set mode to cubes
+
+
+    //Operator controls
+  }
 
   @Override
   public void robotPeriodic() {

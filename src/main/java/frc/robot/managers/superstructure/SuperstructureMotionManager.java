@@ -4,20 +4,21 @@
 
 package frc.robot.managers.superstructure;
 
+import frc.robot.shoulder.ShoulderSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
 import frc.robot.wrist.WristSubsystem;
 import java.util.ArrayList;
 
 public class SuperstructureMotionManager extends LifecycleSubsystem {
-  public final WristSubsystem shoulder;
+  public final ShoulderSubsystem shoulder;
   public final WristSubsystem wrist;
   private SuperstructurePosition currentPoint = Positions.STOWED;
   private SuperstructurePosition goalPosition = Positions.STOWED;
   private final ArrayList<SuperstructurePosition> positionList =
       new ArrayList<SuperstructurePosition>();
 
-  public SuperstructureMotionManager(WristSubsystem shoulder, WristSubsystem wrist) {
+  public SuperstructureMotionManager(ShoulderSubsystem shoulder, WristSubsystem wrist) {
     super(SubsystemPriority.SUPERSTRUCTURE_MOTION_MANAGER);
 
     this.shoulder = shoulder;

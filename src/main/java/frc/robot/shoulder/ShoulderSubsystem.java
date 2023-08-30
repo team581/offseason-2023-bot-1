@@ -22,15 +22,15 @@ public class ShoulderSubsystem extends LifecycleSubsystem {
   private SparkMaxPIDController pid;
   private Rotation2d goalAngle = new Rotation2d();
 
-  public ShoulderSubsystem(CANSparkMax motor, CANSparkMax motorFollower) {
+  public ShoulderSubsystem(CANSparkMax motor, CANSparkMax followerMotor) {
     super(SubsystemPriority.SHOULDER);
     this.motor = motor;
-    this.motorFollower = motorFollower;
-    motorFollower.follow(motor);
+    this.motorFollower = followerMotor;
+    followerMotor.follow(motor);
     encoder = motor.getEncoder();
     pid = motor.getPIDController();
     motor.setSmartCurrentLimit(35);
-    motorFollower.setSmartCurrentLimit(35);
+    followerMotor.setSmartCurrentLimit(35);
 
     pid.setP(5);
     pid.setI(0);
@@ -73,7 +73,7 @@ public class ShoulderSubsystem extends LifecycleSubsystem {
         .until(() -> atAngle(angle));
   }
 
-  private boolean atAngle(Rotation2d angle) {
+  public boolean atAngle(Rotation2d angle) {
     double actualAngle = getWristAngle().getDegrees();
     return Math.abs(actualAngle - angle.getDegrees()) < 1;
   }
