@@ -21,14 +21,14 @@ public class Config {
   public static final String CANIVORE_ID = "581CANivore";
 
   public static final VisionMode VISION_MODE = VisionMode.ENABLED_UNUSED;
-public static final Translation2d SWERVE_FRONT_LEFT_LOCATION =
-   new Translation2d(0.263525, 0.263525);
-public static final Translation2d SWERVE_FRONT_RIGHT_LOCATION =
-   new Translation2d(0.263525, -0.263525);
-public static final Translation2d SWERVE_BACK_LEFT_LOCATION =
-   new Translation2d(-0.263525, 0.263525);
-public static final Translation2d SWERVE_BACK_RIGHT_LOCATION =
-   new Translation2d(-0.263525, -0.263525);
+  public static final Translation2d SWERVE_FRONT_LEFT_LOCATION =
+      new Translation2d(0.263525, 0.263525);
+  public static final Translation2d SWERVE_FRONT_RIGHT_LOCATION =
+      new Translation2d(0.263525, -0.263525);
+  public static final Translation2d SWERVE_BACK_LEFT_LOCATION =
+      new Translation2d(-0.263525, 0.263525);
+  public static final Translation2d SWERVE_BACK_RIGHT_LOCATION =
+      new Translation2d(-0.263525, -0.263525);
 
   public static final double WHEEL_DIAMETER = Units.inchesToMeters(3.84);
   public static final double SWERVE_STEER_GEARING_REDUCTION = 150.0 / 7.0;

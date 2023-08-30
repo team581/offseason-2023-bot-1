@@ -10,7 +10,8 @@ public class SuperstructureScoringState {
   public final SuperstructureState aligning;
   public final SuperstructureState scoring;
 
-  public SuperstructureScoringState(SuperstructurePosition position, IntakeState scoringIntakeState) {
+  public SuperstructureScoringState(
+      SuperstructurePosition position, IntakeState scoringIntakeState) {
     this.aligning = new SuperstructureState(position, IntakeState.STOPPED, true);
     this.scoring = new SuperstructureState(position, scoringIntakeState);
   }

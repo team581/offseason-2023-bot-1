@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.XboxController;
@@ -22,14 +24,10 @@ import frc.robot.managers.superstructure.SuperstructureMotionManager;
 import frc.robot.shoulder.ShoulderSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystemManager;
 import frc.robot.wrist.WristSubsystem;
-
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
-
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -51,11 +49,17 @@ public class Robot extends LoggedRobot {
 
   private final Autos autos = new Autos();
 
-  private final ShoulderSubsystem shoulder = new ShoulderSubsystem(new CANSparkMax(-1, MotorType.kBrushless), new CANSparkMax(-1, MotorType.kBrushless));
-  private final WristSubsystem wrist = new WristSubsystem(new CANSparkMax(-1, MotorType.kBrushless));
-  private final IntakeSubsystem intake = new IntakeSubsystem(new CANSparkMax(-1, MotorType.kBrushless));
-  private final SuperstructureMotionManager motionManager = new SuperstructureMotionManager(shoulder, wrist);
-  private final SuperstructureManager superstructureManager = new SuperstructureManager(motionManager, intake);
+  private final ShoulderSubsystem shoulder =
+      new ShoulderSubsystem(
+          new CANSparkMax(-1, MotorType.kBrushless), new CANSparkMax(-1, MotorType.kBrushless));
+  private final WristSubsystem wrist =
+      new WristSubsystem(new CANSparkMax(-1, MotorType.kBrushless));
+  private final IntakeSubsystem intake =
+      new IntakeSubsystem(new CANSparkMax(-1, MotorType.kBrushless));
+  private final SuperstructureMotionManager motionManager =
+      new SuperstructureMotionManager(shoulder, wrist);
+  private final SuperstructureManager superstructureManager =
+      new SuperstructureManager(motionManager, intake);
 
   private Command autoCommand;
 
@@ -107,15 +111,14 @@ public class Robot extends LoggedRobot {
   private void configureButtonBindings() {
     // TODO: Start adding button bindings
 
-    //Driver controls
+    // Driver controls
 
-    //Floor intake
-    //driveController.leftTrigger(0.3).onTrue();
+    // Floor intake
+    // driveController.leftTrigger(0.3).onTrue();
 
-    //Set mode to cubes
+    // Set mode to cubes
 
-
-    //Operator controls
+    // Operator controls
   }
 
   @Override

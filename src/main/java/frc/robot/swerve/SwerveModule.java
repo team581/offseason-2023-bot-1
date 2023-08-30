@@ -24,8 +24,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import frc.robot.config.Config;
 import frc.robot.util.CircleConverter;
-import org.littletonrobotics.junction.Logger;
 import frc.robot.util.CtreModuleState;
+import org.littletonrobotics.junction.Logger;
 
 public class SwerveModule {
   private static final CircleConverter DRIVE_MOTOR_WHEEL_CONVERTER =
