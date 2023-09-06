@@ -24,6 +24,7 @@ import frc.robot.fms.FmsSubsystem;
 import frc.robot.generated.BuildConstants;
 import frc.robot.imu.ImuSubsystem;
 import frc.robot.intake.HeldGamePiece;
+import frc.robot.intake.IntakeState;
 import frc.robot.intake.IntakeSubsystem;
 import frc.robot.managers.autobalance.Autobalance;
 import frc.robot.managers.autorotate.AutoRotate;
@@ -186,14 +187,20 @@ public class Robot extends LoggedRobot {
                     && driveController.getThetaPercentage() == 0)
         .onFalse(swerve.disableXSwerveCommand());
 
-    // Set ;mode to cubes
-
     // Operator controls
     operatorController.y().onTrue(superstructure.getScoreAlignCommand(NodeHeight.HIGH));
     operatorController.b().onTrue(superstructure.getScoreAlignCommand(NodeHeight.MID));
     operatorController.a().onTrue(superstructure.setStateCommand(States.STOWED));
-    // operatorController.leftTrigger().onTrue();
-    // operatorController.rightTrigger().onTrue(autoCommand);
+
+    // Manual intake override
+    operatorController
+        .leftTrigger()
+        .onTrue(superstructure.setIntakeOverrideCommand(IntakeState.MANUAL_INTAKE))
+        .onFalse(superstructure.setIntakeOverrideCommand(null));
+    operatorController
+        .rightTrigger()
+        .onTrue(superstructure.setIntakeOverrideCommand(IntakeState.MANUAL_OUTTAKE))
+        .onFalse(superstructure.setIntakeOverrideCommand(null));
   }
 
   @Override
