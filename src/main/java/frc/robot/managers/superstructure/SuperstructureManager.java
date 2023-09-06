@@ -4,7 +4,6 @@
 
 package frc.robot.managers.superstructure;
 
-import edu.wpi.first.wpilibj.ADIS16448_IMU.IMUAxis;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.imu.ImuSubsystem;
@@ -28,7 +27,8 @@ public class SuperstructureManager extends LifecycleSubsystem {
   private NodeHeight scoringHeight = null;
   private IntakeState manualIntakeState = null;
 
-  public SuperstructureManager(SuperstructureMotionManager motionManager, IntakeSubsystem intake, ImuSubsystem imu) {
+  public SuperstructureManager(
+      SuperstructureMotionManager motionManager, IntakeSubsystem intake, ImuSubsystem imu) {
     super(SubsystemPriority.SUPERSTRUCTURE_MANAGER);
 
     this.motionManager = motionManager;
@@ -124,12 +124,12 @@ public class SuperstructureManager extends LifecycleSubsystem {
 
     if (height == NodeHeight.LOW) {
       double heading = imu.getRobotHeading().getDegrees();
-      if(heading < 90 && heading > -90){
+      if (heading < 90 && heading > -90) {
         cubeState = States.CUBE_NODE_LOW_FRONT;
-      coneState = States.CONE_NODE_LOW_FRONT;
-      } else if(heading < -90 && heading > 90){
+        coneState = States.CONE_NODE_LOW_FRONT;
+      } else {
         cubeState = States.CUBE_NODE_LOW_BACK;
-      coneState = States.CONE_NODE_LOW_BACK;
+        coneState = States.CONE_NODE_LOW_BACK;
       }
 
     } else if (height == NodeHeight.MID) {
