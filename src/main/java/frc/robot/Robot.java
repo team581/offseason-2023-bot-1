@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.autos.Autos;
 import frc.robot.config.Config;
 import frc.robot.controller.DriveController;
@@ -22,7 +23,12 @@ import frc.robot.controller.RumbleControllerSubsystem;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.generated.BuildConstants;
 import frc.robot.imu.ImuSubsystem;
+import frc.robot.intake.HeldGamePiece;
 import frc.robot.intake.IntakeSubsystem;
+import frc.robot.managers.autobalance.Autobalance;
+import frc.robot.managers.autorotate.AutoRotate;
+import frc.robot.managers.superstructure.NodeHeight;
+import frc.robot.managers.superstructure.States;
 import frc.robot.managers.superstructure.SuperstructureManager;
 import frc.robot.managers.superstructure.SuperstructureMotionManager;
 import frc.robot.shoulder.ShoulderSubsystem;
@@ -76,7 +82,6 @@ public class Robot extends LoggedRobot {
       new RumbleControllerSubsystem(new XboxController(1));
 
   private final FmsSubsystem fmsSubsystem = new FmsSubsystem();
-  // TODO: Add all the subsystems & managers here
 
   private final Autos autos = new Autos();
 
@@ -90,12 +95,16 @@ public class Robot extends LoggedRobot {
       new IntakeSubsystem(new CANSparkMax(Config.INTAKE_ID, MotorType.kBrushless));
   private final SuperstructureMotionManager motionManager =
       new SuperstructureMotionManager(shoulder, wrist);
-  private final SuperstructureManager superstructureManager =
+  private final SuperstructureManager superstructure =
       new SuperstructureManager(motionManager, intake);
   private final ImuSubsystem imu =
       new ImuSubsystem(new Pigeon2(Config.PIGEON2_ID, Config.CANIVORE_ID));
   private final SwerveSubsystem swerve =
       new SwerveSubsystem(imu, frontRight, frontLeft, backRight, backLeft);
+
+  private final Autobalance autobalance = new Autobalance(swerve, imu);
+  private final AutoRotate autoRotate = new AutoRotate(swerve);
+
   private Command autoCommand;
 
   public Robot() {
@@ -144,16 +153,47 @@ public class Robot extends LoggedRobot {
   public void robotInit() {}
 
   private void configureButtonBindings() {
+    swerve.setDefaultCommand(swerve.getDriveTeleopCommand(driveController));
+
     // TODO: Start adding button bindings
 
     // Driver controls
+    // driveController.leftStick();
+    // driveController.rightStick();
+    driveController.leftTrigger().onTrue(superstructure.getIntakeFloorCommand());
+    driveController.leftBumper().onTrue(superstructure.getIntakeShelfCommand());
+    driveController.rightTrigger().onTrue(superstructure.getScoreFinishCommand());
+    driveController.rightBumper().onTrue(superstructure.getIntakeSingleSubstationCommand());
+    driveController.back().onTrue(imu.getZeroCommand());
 
-    // Floor intake
-    // driveController.leftTrigger(0.3).onTrue();
+    driveController.povUp().onTrue(superstructure.setModeCommand(HeldGamePiece.CUBE));
+    driveController.povDown().onTrue(superstructure.setModeCommand(HeldGamePiece.CONE));
+    // Snaps for all cardinal directions
+    driveController.x().onTrue(autoRotate.getCommand(() -> AutoRotate.getLeftAngle()));
+    driveController.b().onTrue(autoRotate.getCommand(() -> AutoRotate.getRightAngle()));
+    driveController.y().onTrue(autoRotate.getCommand(() -> AutoRotate.getForwardAngle()));
+    driveController.a().onTrue(autoRotate.getCommand(() -> AutoRotate.getBackwardsAngle()));
 
-    // Set mode to cubes
+    new Trigger(() -> driveController.getThetaPercentage() == 0)
+        .onFalse(autoRotate.getDisableCommand());
+    // X swerve
+    driveController.start().onTrue(swerve.getXSwerveCommand());
+
+    new Trigger(
+            () ->
+                driveController.getSidewaysPercentage() == 0
+                    && driveController.getForwardPercentage() == 0
+                    && driveController.getThetaPercentage() == 0)
+        .onFalse(swerve.disableXSwerveCommand());
+
+    // Set ;mode to cubes
 
     // Operator controls
+    operatorController.y().onTrue(superstructure.getScoreAlignCommand(NodeHeight.HIGH));
+    operatorController.b().onTrue(superstructure.getScoreAlignCommand(NodeHeight.MID));
+    operatorController.a().onTrue(superstructure.setStateCommand(States.STOWED));
+    // operatorController.leftTrigger().onTrue();
+    // operatorController.rightTrigger().onTrue(autoCommand);
   }
 
   @Override

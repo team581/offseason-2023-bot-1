@@ -20,6 +20,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
   private IntakeSubsystem intake;
   private SuperstructureState goalState;
   private HeldGamePiece mode = HeldGamePiece.CUBE;
+  private NodeHeight scoringHeight = null;
 
   public SuperstructureManager(SuperstructureMotionManager motionManager, IntakeSubsystem intake) {
     super(SubsystemPriority.SUPERSTRUCTURE_MANAGER);
@@ -56,11 +57,22 @@ public class SuperstructureManager extends LifecycleSubsystem {
     this.mode = mode;
   }
 
+  // create a set mode command
+  // which just calls set mode
+
+  public Command setModeCommand(HeldGamePiece mode) {
+    return runOnce(
+        () -> {
+          setMode(mode);
+        });
+  }
+
   public HeldGamePiece getMode() {
     return mode;
   }
 
   public Command getIntakeFloorCommand() {
+    // TODO: Refactor to use setStateCommand, since this command never finishes atm
     return Commands.run(
         () -> {
           if (mode == HeldGamePiece.CONE) {
@@ -72,6 +84,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
   }
 
   public Command getIntakeShelfCommand() {
+    // TODO: Refactor to use setStateCommand, since this command never finishes atm
     return Commands.run(
         () -> {
           if (mode == HeldGamePiece.CONE) {
@@ -83,7 +96,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
   }
 
   public Command getIntakeSingleSubstationCommand() {
-    return Commands.run(() -> setGoal(States.INTAKING_CONE_SINGLE_SUBSTATION));
+    return setStateCommand(States.INTAKING_CONE_SINGLE_SUBSTATION);
   }
 
   private SuperstructureScoringState getScoringState(NodeHeight height) {
@@ -109,16 +122,27 @@ public class SuperstructureManager extends LifecycleSubsystem {
   }
 
   public Command getScoreAlignCommand(NodeHeight height) {
-    return Commands.run(
-        () -> {
-          setGoal(getScoringState(height).aligning);
-        });
+    return Commands.runOnce(
+            () -> {
+              scoringHeight = height;
+            })
+        .andThen(setStateCommand(getScoringState(height).aligning));
+  }
+
+  public Command getScoreFinishCommand() {
+    return getScoreFinishCommand(scoringHeight == null ? NodeHeight.LOW : scoringHeight);
   }
 
   public Command getScoreFinishCommand(NodeHeight height) {
-    return Commands.run(
-        () -> {
-          setGoal(getScoringState(height).scoring);
-        });
+    return Commands.runOnce(
+            () -> {
+              scoringHeight = height;
+            })
+        .andThen(setStateCommand(getScoringState(height).scoring))
+        .andThen(
+            Commands.runOnce(
+                () -> {
+                  scoringHeight = null;
+                }));
   }
 }

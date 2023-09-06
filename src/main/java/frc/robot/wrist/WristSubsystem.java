@@ -9,7 +9,6 @@ import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
 import org.littletonrobotics.junction.Logger;
@@ -51,13 +50,6 @@ public class WristSubsystem extends LifecycleSubsystem {
 
   public void set(Rotation2d angle) {
     goalAngle = angle;
-  }
-
-  public Command setPositionCommand(Rotation2d angle) {
-    return run(() -> {
-          set(angle);
-        })
-        .until(() -> atAngle(angle));
   }
 
   public boolean atAngle(Rotation2d angle) {
