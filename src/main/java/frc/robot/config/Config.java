@@ -20,6 +20,14 @@ public class Config {
 
   public static final String CANIVORE_ID = "581CANivore";
 
+  public static final int SHOULDER_ID = 14;
+  public static final int SHOULDER2_ID = 15;
+  public static final int PIGEON2_ID = 1;
+  public static final int PDP_ID = 0;
+  public static final int WRIST_ID = 16;
+  public static final int INTAKE_ID = 17;
+  public static final int CANDLE_ID = 18;
+
   public static final VisionMode VISION_MODE = VisionMode.ENABLED_UNUSED;
   public static final Translation2d SWERVE_FRONT_LEFT_LOCATION =
       new Translation2d(0.263525, 0.263525);
@@ -58,7 +66,7 @@ public class Config {
   public static final PIDConstants SWERVE_ROTATION_SNAP_PID = PIDConstants(7.5, 0, 0.5);
   public static final boolean SWERVE_USE_FOC = true;
 
-  final int SWERVE_FL_DRIVE_MOTOR_ID = 8;
+  public static final int SWERVE_FL_DRIVE_MOTOR_ID = 8;
   public static final int SWERVE_FL_STEER_MOTOR_ID = 9;
   public static final int SWERVE_FL_CANCODER_ID = 13;
   public static final SwerveModuleConstants SWERVE_FL_CONSTANTS =

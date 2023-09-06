@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -18,10 +21,13 @@ import frc.robot.controller.DriveController;
 import frc.robot.controller.RumbleControllerSubsystem;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.generated.BuildConstants;
+import frc.robot.imu.ImuSubsystem;
 import frc.robot.intake.IntakeSubsystem;
 import frc.robot.managers.superstructure.SuperstructureManager;
 import frc.robot.managers.superstructure.SuperstructureMotionManager;
 import frc.robot.shoulder.ShoulderSubsystem;
+import frc.robot.swerve.SwerveModule;
+import frc.robot.swerve.SwerveSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystemManager;
 import frc.robot.wrist.WristSubsystem;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -37,7 +43,32 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
  */
 public class Robot extends LoggedRobot {
   // Enables power distribution logging
-  private final PowerDistribution pdpLogging = new PowerDistribution(1, ModuleType.kRev);
+  private final PowerDistribution pdpLogging =
+      new PowerDistribution(Config.PDP_ID, ModuleType.kRev);
+  private final SwerveModule frontLeft =
+      new SwerveModule(
+          Config.SWERVE_FL_CONSTANTS,
+          new TalonFX(Config.SWERVE_FL_DRIVE_MOTOR_ID, Config.CANIVORE_ID),
+          new TalonFX(Config.SWERVE_FL_STEER_MOTOR_ID, Config.CANIVORE_ID),
+          new CANcoder(Config.SWERVE_FL_CANCODER_ID, Config.CANIVORE_ID));
+  private final SwerveModule frontRight =
+      new SwerveModule(
+          Config.SWERVE_FR_CONSTANTS,
+          new TalonFX(Config.SWERVE_FR_DRIVE_MOTOR_ID, Config.CANIVORE_ID),
+          new TalonFX(Config.SWERVE_FR_STEER_MOTOR_ID, Config.CANIVORE_ID),
+          new CANcoder(Config.SWERVE_FR_CANCODER_ID, Config.CANIVORE_ID));
+  private final SwerveModule backLeft =
+      new SwerveModule(
+          Config.SWERVE_BL_CONSTANTS,
+          new TalonFX(Config.SWERVE_BL_DRIVE_MOTOR_ID, Config.CANIVORE_ID),
+          new TalonFX(Config.SWERVE_BL_STEER_MOTOR_ID, Config.CANIVORE_ID),
+          new CANcoder(Config.SWERVE_BL_CANCODER_ID, Config.CANIVORE_ID));
+  private final SwerveModule backRight =
+      new SwerveModule(
+          Config.SWERVE_BR_CONSTANTS,
+          new TalonFX(Config.SWERVE_BR_DRIVE_MOTOR_ID, Config.CANIVORE_ID),
+          new TalonFX(Config.SWERVE_BR_STEER_MOTOR_ID, Config.CANIVORE_ID),
+          new CANcoder(Config.SWERVE_BR_CANCODER_ID, Config.CANIVORE_ID));
 
   private final DriveController driveController = new DriveController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
@@ -51,16 +82,20 @@ public class Robot extends LoggedRobot {
 
   private final ShoulderSubsystem shoulder =
       new ShoulderSubsystem(
-          new CANSparkMax(-1, MotorType.kBrushless), new CANSparkMax(-1, MotorType.kBrushless));
+          new CANSparkMax(Config.SHOULDER_ID, MotorType.kBrushless),
+          new CANSparkMax(Config.SHOULDER2_ID, MotorType.kBrushless));
   private final WristSubsystem wrist =
-      new WristSubsystem(new CANSparkMax(-1, MotorType.kBrushless));
+      new WristSubsystem(new CANSparkMax(Config.WRIST_ID, MotorType.kBrushless));
   private final IntakeSubsystem intake =
-      new IntakeSubsystem(new CANSparkMax(-1, MotorType.kBrushless));
+      new IntakeSubsystem(new CANSparkMax(Config.INTAKE_ID, MotorType.kBrushless));
   private final SuperstructureMotionManager motionManager =
       new SuperstructureMotionManager(shoulder, wrist);
   private final SuperstructureManager superstructureManager =
       new SuperstructureManager(motionManager, intake);
-
+  private final ImuSubsystem imu =
+      new ImuSubsystem(new Pigeon2(Config.PIGEON2_ID, Config.CANIVORE_ID));
+  private final SwerveSubsystem swerve =
+      new SwerveSubsystem(imu, frontRight, frontLeft, backRight, backLeft);
   private Command autoCommand;
 
   public Robot() {
