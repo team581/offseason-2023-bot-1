@@ -4,8 +4,10 @@
 
 package frc.robot.managers.superstructure;
 
+import edu.wpi.first.wpilibj.ADIS16448_IMU.IMUAxis;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.imu.ImuSubsystem;
 import frc.robot.intake.HeldGamePiece;
 import frc.robot.intake.IntakeSubsystem;
 import frc.robot.shoulder.ShoulderSubsystem;
@@ -15,21 +17,23 @@ import frc.robot.wrist.WristSubsystem;
 import java.util.function.Supplier;
 
 public class SuperstructureManager extends LifecycleSubsystem {
-  private SuperstructureMotionManager motionManager;
-  private ShoulderSubsystem shoulder;
-  private WristSubsystem wrist;
-  private IntakeSubsystem intake;
+  private final ImuSubsystem imu;
+  private final SuperstructureMotionManager motionManager;
+  private final ShoulderSubsystem shoulder;
+  private final WristSubsystem wrist;
+  private final IntakeSubsystem intake;
   private SuperstructureState goalState;
   private HeldGamePiece mode = HeldGamePiece.CUBE;
   private NodeHeight scoringHeight = null;
 
-  public SuperstructureManager(SuperstructureMotionManager motionManager, IntakeSubsystem intake) {
+  public SuperstructureManager(SuperstructureMotionManager motionManager, IntakeSubsystem intake, ImuSubsystem imu) {
     super(SubsystemPriority.SUPERSTRUCTURE_MANAGER);
 
     this.motionManager = motionManager;
     this.shoulder = motionManager.shoulder;
     this.wrist = motionManager.wrist;
     this.intake = intake;
+    this.imu = imu;
   }
 
   private void setGoal(SuperstructureState goalState) {
@@ -107,8 +111,15 @@ public class SuperstructureManager extends LifecycleSubsystem {
     SuperstructureScoringState coneState;
 
     if (height == NodeHeight.LOW) {
-      cubeState = States.CUBE_NODE_LOW;
-      coneState = States.CONE_NODE_LOW;
+      double heading = imu.getRobotHeading().getDegrees();
+      if(heading < 90 && heading > -90){
+        cubeState = States.CUBE_NODE_LOW_FRONT;
+      coneState = States.CONE_NODE_LOW_FRONT;
+      } else if(heading < -90 && heading > 90){
+        cubeState = States.CUBE_NODE_LOW_BACK;
+      coneState = States.CONE_NODE_LOW_BACK;
+      }
+
     } else if (height == NodeHeight.MID) {
       cubeState = States.CUBE_NODE_MID;
       coneState = States.CONE_NODE_MID;

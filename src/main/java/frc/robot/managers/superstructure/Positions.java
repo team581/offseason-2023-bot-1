@@ -15,8 +15,10 @@ public class Positions {
   public static final SuperstructurePosition INTAKING_CUBE_SHELF =
       new SuperstructurePosition(Rotation2d.fromDegrees(90), Rotation2d.fromDegrees(180));
 
-  public static final SuperstructurePosition CUBE_NODE_LOW =
+  public static final SuperstructurePosition CUBE_NODE_LOW_FRONT =
       new SuperstructurePosition(Rotation2d.fromDegrees(-20), Rotation2d.fromDegrees(-135));
+  public static final SuperstructurePosition CUBE_NODE_LOW_BACK =
+      new SuperstructurePosition(Rotation2d.fromDegrees(20), Rotation2d.fromDegrees(135));
   public static final SuperstructurePosition CUBE_NODE_MID =
       new SuperstructurePosition(Rotation2d.fromDegrees(-75), Rotation2d.fromDegrees(-190));
   public static final SuperstructurePosition CUBE_NODE_HIGH =
@@ -29,8 +31,10 @@ public class Positions {
   public static final SuperstructurePosition INTAKING_CONE_SINGLE_SUBSTATION =
       new SuperstructurePosition(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(30));
 
-  public static final SuperstructurePosition CONE_NODE_LOW =
+  public static final SuperstructurePosition CONE_NODE_LOW_FRONT =
       new SuperstructurePosition(Rotation2d.fromDegrees(-20), Rotation2d.fromDegrees(-135));
+  public static final SuperstructurePosition CONE_NODE_LOW_BACK =
+      new SuperstructurePosition(Rotation2d.fromDegrees(20), Rotation2d.fromDegrees(135));
   public static final SuperstructurePosition CONE_NODE_MID =
       new SuperstructurePosition(Rotation2d.fromDegrees(-75), Rotation2d.fromDegrees(-190));
   public static final SuperstructurePosition CONE_NODE_HIGH =
