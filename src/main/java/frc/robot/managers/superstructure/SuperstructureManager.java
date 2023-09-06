@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.imu.ImuSubsystem;
 import frc.robot.intake.HeldGamePiece;
+import frc.robot.intake.IntakeState;
 import frc.robot.intake.IntakeSubsystem;
 import frc.robot.shoulder.ShoulderSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystem;
@@ -25,6 +26,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
   private SuperstructureState goalState;
   private HeldGamePiece mode = HeldGamePiece.CUBE;
   private NodeHeight scoringHeight = null;
+  private IntakeState manualIntakeState = null;
 
   public SuperstructureManager(SuperstructureMotionManager motionManager, IntakeSubsystem intake, ImuSubsystem imu) {
     super(SubsystemPriority.SUPERSTRUCTURE_MANAGER);
@@ -48,9 +50,22 @@ public class SuperstructureManager extends LifecycleSubsystem {
   public void enabledPeriodic() {
     motionManager.set(goalState.position);
 
-    if (motionManager.atPosition(goalState.position) || goalState.intakeNow) {
+    if (manualIntakeState != null) {
+      intake.setGoalState(manualIntakeState);
+    } else if (motionManager.atPosition(goalState.position) || goalState.intakeNow) {
       intake.setGoalState(goalState.intakeState);
     }
+  }
+
+  public void setIntakeOverride(IntakeState intakeState) {
+    manualIntakeState = intakeState;
+  }
+
+  public Command setIntakeOverrideCommand(IntakeState intakeState) {
+    return runOnce(
+        () -> {
+          setIntakeOverride(intakeState);
+        });
   }
 
   public Command setStateCommand(SuperstructureState newGoalState) {
@@ -65,9 +80,6 @@ public class SuperstructureManager extends LifecycleSubsystem {
   public void setMode(HeldGamePiece mode) {
     this.mode = mode;
   }
-
-  // create a set mode command
-  // which just calls set mode
 
   public Command setModeCommand(HeldGamePiece mode) {
     return runOnce(
