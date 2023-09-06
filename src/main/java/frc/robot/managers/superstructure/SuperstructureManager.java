@@ -12,6 +12,7 @@ import frc.robot.shoulder.ShoulderSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
 import frc.robot.wrist.WristSubsystem;
+import java.util.function.Supplier;
 
 public class SuperstructureManager extends LifecycleSubsystem {
   private SuperstructureMotionManager motionManager;
@@ -49,8 +50,12 @@ public class SuperstructureManager extends LifecycleSubsystem {
   }
 
   public Command setStateCommand(SuperstructureState newGoalState) {
-    return Commands.runOnce(() -> setGoal(newGoalState))
-        .andThen(Commands.waitUntil(() -> atGoal(newGoalState)));
+    return setStateCommand(() -> newGoalState);
+  }
+
+  public Command setStateCommand(Supplier<SuperstructureState> newGoalState) {
+    return Commands.runOnce(() -> setGoal(newGoalState.get()))
+        .andThen(Commands.waitUntil(() -> atGoal(newGoalState.get())));
   }
 
   public void setMode(HeldGamePiece mode) {
@@ -72,25 +77,23 @@ public class SuperstructureManager extends LifecycleSubsystem {
   }
 
   public Command getIntakeFloorCommand() {
-    // TODO: Refactor to use setStateCommand, since this command never finishes atm
-    return Commands.run(
+    return setStateCommand(
         () -> {
           if (mode == HeldGamePiece.CONE) {
-            setGoal(States.INTAKING_CONE_FLOOR);
+            return States.INTAKING_CONE_FLOOR;
           } else {
-            setGoal(States.INTAKING_CUBE_FLOOR);
+            return States.INTAKING_CUBE_FLOOR;
           }
         });
   }
 
   public Command getIntakeShelfCommand() {
-    // TODO: Refactor to use setStateCommand, since this command never finishes atm
-    return Commands.run(
+    return setStateCommand(
         () -> {
           if (mode == HeldGamePiece.CONE) {
-            setGoal(States.INTAKING_CONE_SHELF);
+            return States.INTAKING_CONE_SHELF;
           } else {
-            setGoal(States.INTAKING_CUBE_SHELF);
+            return States.INTAKING_CUBE_SHELF;
           }
         });
   }
