@@ -161,9 +161,9 @@ public class Robot extends LoggedRobot {
     // Driver controls
     // driveController.leftStick();
     // driveController.rightStick();
-    driveController.leftTrigger().onTrue(superstructure.getIntakeFloorCommand());
+    driveController.leftTrigger(0.3).onTrue(superstructure.getIntakeFloorCommand());
     driveController.leftBumper().onTrue(superstructure.getIntakeShelfCommand());
-    driveController.rightTrigger().onTrue(superstructure.getScoreFinishCommand());
+    driveController.rightTrigger(0.3).onTrue(superstructure.getScoreFinishCommand());
     driveController.rightBumper().onTrue(superstructure.getIntakeSingleSubstationCommand());
     driveController.back().onTrue(imu.getZeroCommand());
 
@@ -194,11 +194,11 @@ public class Robot extends LoggedRobot {
 
     // Manual intake override
     operatorController
-        .leftTrigger()
+        .leftTrigger(0.3)
         .onTrue(superstructure.setIntakeOverrideCommand(IntakeState.MANUAL_INTAKE))
         .onFalse(superstructure.setIntakeOverrideCommand(null));
     operatorController
-        .rightTrigger()
+        .rightTrigger(0.3)
         .onTrue(superstructure.setIntakeOverrideCommand(IntakeState.MANUAL_OUTTAKE))
         .onFalse(superstructure.setIntakeOverrideCommand(null));
   }
