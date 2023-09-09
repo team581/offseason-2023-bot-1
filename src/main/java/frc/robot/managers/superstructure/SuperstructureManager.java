@@ -171,4 +171,8 @@ public class SuperstructureManager extends LifecycleSubsystem {
                   scoringHeight = null;
                 }));
   }
+
+  public Command yeetConeCommand() {
+    return Commands.runOnce(() -> (setStateCommand(States.YEET_CONE))).waitUntil(atGoal(States.YEET_CONE)).andThen(setStateCommand(States.STOWED));
+  }
 }

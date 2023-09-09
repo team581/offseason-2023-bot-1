@@ -34,12 +34,15 @@ public class States {
 
   public static final SuperstructureScoringState CONE_NODE_LOW_BACK =
       new SuperstructureScoringState(Positions.CONE_NODE_LOW_BACK, IntakeState.OUTTAKE_CONE);
-      public static final SuperstructureScoringState CONE_NODE_LOW_FRONT =
+    public static final SuperstructureScoringState CONE_NODE_LOW_FRONT =
       new SuperstructureScoringState(Positions.CONE_NODE_LOW_FRONT, IntakeState.OUTTAKE_CONE);
   public static final SuperstructureScoringState CONE_NODE_MID =
       new SuperstructureScoringState(Positions.CONE_NODE_MID, IntakeState.OUTTAKE_CONE);
   public static final SuperstructureScoringState CONE_NODE_HIGH =
       new SuperstructureScoringState(Positions.CONE_NODE_HIGH, IntakeState.OUTTAKE_CONE);
+
+  public static final SuperstructureState YEET_CONE =
+      new SuperstructureState(Positions.YEET_CONE, IntakeState.OUTTAKE_CONE, true);
 
   // Template to save time: public static final SuperstructureState  = new
   // SuperstructureState(positions.);

@@ -40,5 +40,8 @@ public class Positions {
   public static final SuperstructurePosition CONE_NODE_HIGH =
       new SuperstructurePosition(Rotation2d.fromDegrees(-100), Rotation2d.fromDegrees(-190));
 
+  public static final SuperstructurePosition YEET_CONE =
+      new SuperstructurePosition(Rotation2d.fromDegrees(-50), Rotation2d.fromDegrees(-135));
+
   private Positions() {}
 }
