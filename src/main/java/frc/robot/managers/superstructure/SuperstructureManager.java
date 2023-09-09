@@ -10,6 +10,7 @@ import frc.robot.imu.ImuSubsystem;
 import frc.robot.intake.HeldGamePiece;
 import frc.robot.intake.IntakeState;
 import frc.robot.intake.IntakeSubsystem;
+import frc.robot.managers.autorotate.AutoRotate;
 import frc.robot.shoulder.ShoulderSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
@@ -124,7 +125,9 @@ public class SuperstructureManager extends LifecycleSubsystem {
 
     if (height == NodeHeight.LOW) {
       double heading = imu.getRobotHeading().getDegrees();
-      if (heading < 90 && heading > -90) {
+      double leftAngle = AutoRotate.getLeftAngle().getDegrees();
+      double rightAngle = AutoRotate.getRightAngle().getDegrees();
+      if (heading < leftAngle && heading > rightAngle) {
         cubeState = States.CUBE_NODE_LOW_FRONT;
         coneState = States.CONE_NODE_LOW_FRONT;
       } else {
