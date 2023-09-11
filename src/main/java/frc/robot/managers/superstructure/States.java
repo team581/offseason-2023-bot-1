@@ -17,7 +17,7 @@ public class States {
 
   public static final SuperstructureScoringState CUBE_NODE_LOW_BACK =
       new SuperstructureScoringState(Positions.CUBE_NODE_LOW_BACK, IntakeState.OUTTAKE_CUBE);
-      public static final SuperstructureScoringState CUBE_NODE_LOW_FRONT =
+  public static final SuperstructureScoringState CUBE_NODE_LOW_FRONT =
       new SuperstructureScoringState(Positions.CUBE_NODE_LOW_FRONT, IntakeState.OUTTAKE_CUBE);
   public static final SuperstructureScoringState CUBE_NODE_MID =
       new SuperstructureScoringState(Positions.CUBE_NODE_MID, IntakeState.OUTTAKE_CUBE);
@@ -34,7 +34,7 @@ public class States {
 
   public static final SuperstructureScoringState CONE_NODE_LOW_BACK =
       new SuperstructureScoringState(Positions.CONE_NODE_LOW_BACK, IntakeState.OUTTAKE_CONE);
-    public static final SuperstructureScoringState CONE_NODE_LOW_FRONT =
+  public static final SuperstructureScoringState CONE_NODE_LOW_FRONT =
       new SuperstructureScoringState(Positions.CONE_NODE_LOW_FRONT, IntakeState.OUTTAKE_CONE);
   public static final SuperstructureScoringState CONE_NODE_MID =
       new SuperstructureScoringState(Positions.CONE_NODE_MID, IntakeState.OUTTAKE_CONE);
