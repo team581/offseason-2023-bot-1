@@ -41,6 +41,9 @@ public class SuperstructureManager extends LifecycleSubsystem {
 
   private void setGoal(SuperstructureState goalState) {
     this.goalState = goalState;
+    if (goalState.equals(States.STOWED)) {
+      scoringProgress = ScoringProgress.NOT_SCORING;
+    }
   }
 
   public boolean atGoal(SuperstructureState state) {
@@ -93,7 +96,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
     return mode;
   }
 
-  public ScoringProgress getScoringProgress(){
+  public ScoringProgress getScoringProgress() {
     return scoringProgress;
   }
 
