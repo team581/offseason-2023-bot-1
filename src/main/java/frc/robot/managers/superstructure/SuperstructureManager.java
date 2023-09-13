@@ -27,6 +27,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
   private HeldGamePiece mode = HeldGamePiece.CUBE;
   private NodeHeight scoringHeight = null;
   private IntakeState manualIntakeState = null;
+  private ScoringProgress scoringProgress = ScoringProgress.NOT_SCORING;
 
   public SuperstructureManager(
       SuperstructureMotionManager motionManager, IntakeSubsystem intake, ImuSubsystem imu) {
@@ -41,6 +42,9 @@ public class SuperstructureManager extends LifecycleSubsystem {
 
   private void setGoal(SuperstructureState goalState) {
     this.goalState = goalState;
+    if (goalState.equals(States.STOWED)) {
+      scoringProgress = ScoringProgress.NOT_SCORING;
+    }
   }
 
   public boolean atGoal(SuperstructureState state) {
@@ -91,6 +95,10 @@ public class SuperstructureManager extends LifecycleSubsystem {
 
   public HeldGamePiece getMode() {
     return mode;
+  }
+
+  public ScoringProgress getScoringProgress() {
+    return scoringProgress;
   }
 
   public Command getIntakeFloorCommand() {
@@ -154,6 +162,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
     return Commands.runOnce(
             () -> {
               scoringHeight = height;
+              scoringProgress = ScoringProgress.ALIGNING;
             })
         .andThen(setStateCommand(getScoringState(height).aligning));
   }
@@ -166,12 +175,14 @@ public class SuperstructureManager extends LifecycleSubsystem {
     return Commands.runOnce(
             () -> {
               scoringHeight = height;
+              scoringProgress = ScoringProgress.PLACING;
             })
         .andThen(setStateCommand(getScoringState(height).scoring))
         .andThen(
             Commands.runOnce(
                 () -> {
                   scoringHeight = null;
+                  scoringProgress = ScoringProgress.DONE_SCORING;
                 }));
   }
 

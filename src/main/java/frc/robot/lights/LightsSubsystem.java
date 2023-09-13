@@ -13,6 +13,7 @@ import frc.robot.fms.FmsSubsystem;
 import frc.robot.intake.HeldGamePiece;
 import frc.robot.intake.IntakeState;
 import frc.robot.intake.IntakeSubsystem;
+import frc.robot.managers.superstructure.ScoringProgress;
 import frc.robot.managers.superstructure.SuperstructureManager;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
@@ -43,6 +44,7 @@ public class LightsSubsystem extends LifecycleSubsystem {
     HeldGamePiece gamePiece = intake.getGamePiece();
     IntakeState intakeMode = intake.getIntakeState();
     HeldGamePiece superstructureMode = superstructure.getMode();
+    ScoringProgress scoringProgress = superstructure.getScoringProgress();
 
     if (DriverStation.isDisabled()) {
       if (FmsSubsystem.isRedAlliance()) {
@@ -52,6 +54,13 @@ public class LightsSubsystem extends LifecycleSubsystem {
         color = Color.kBlue;
         blinkPattern = BlinkPattern.SOLID;
       }
+    } else if (scoringProgress == ScoringProgress.ALIGNING
+        || scoringProgress == ScoringProgress.PLACING) {
+      color = Color.kGreen;
+      blinkPattern = BlinkPattern.BLINK_SLOW;
+    } else if (scoringProgress == ScoringProgress.DONE_SCORING) {
+      color = Color.kGreen;
+      blinkPattern = BlinkPattern.BLINK_FAST;
     } else if (gamePiece == HeldGamePiece.CUBE) {
       if (intakeMode == IntakeState.INTAKE_CUBE) {
         color = Color.kPurple;
