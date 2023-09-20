@@ -7,7 +7,12 @@ package frc.robot.autos;
 import com.pathplanner.lib.PathConstraints;
 
 public enum AutoKind {
-  DO_NOTHING("", 0.01, 0.01, false);
+  DO_NOTHING("", 0.01, 0.01, false),
+
+  BLUE_SHORT_SIDE_3("BlueShortSide3", 4, 4, false),
+  BLUE_LONG_SIDE_3("BlueShortSide3", 4, 4, false),
+  RED_SHORT_SIDE_3("RedShortSide3", 4, 4, false),
+  RED_LONG_SIDE_3("RedShortSide3", 4, 4, false);
 
   public final String pathName;
   public final PathConstraints constraints;
