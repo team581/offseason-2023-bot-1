@@ -4,19 +4,22 @@
 
 package frc.robot.swerve;
 
-import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.commands.PPSwerveControllerCommand;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
+import org.littletonrobotics.junction.Logger;
+
+import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SwerveModuleSteerFeedbackType;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstantsFactory;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain.SwerveDriveState;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -24,215 +27,121 @@ import frc.robot.config.Config;
 import frc.robot.controller.DriveController;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.imu.ImuSubsystem;
-import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
-import org.littletonrobotics.junction.Logger;
 
 public class SwerveSubsystem extends LifecycleSubsystem {
-  private static final Translation2d FRONT_LEFT_LOCATION = Config.SWERVE_FRONT_LEFT_LOCATION;
-  private static final Translation2d FRONT_RIGHT_LOCATION = Config.SWERVE_FRONT_RIGHT_LOCATION;
-  private static final Translation2d BACK_LEFT_LOCATION = Config.SWERVE_BACK_LEFT_LOCATION;
-  private static final Translation2d BACK_RIGHT_LOCATION = Config.SWERVE_BACK_RIGHT_LOCATION;
   public static final SwerveDriveKinematics KINEMATICS =
       new SwerveDriveKinematics(
-          FRONT_LEFT_LOCATION, FRONT_RIGHT_LOCATION, BACK_LEFT_LOCATION, BACK_RIGHT_LOCATION);
-  public static final double MAX_VELOCITY =
+          Config.SWERVE_FRONT_LEFT_LOCATION,
+          Config.SWERVE_FRONT_RIGHT_LOCATION,
+          Config.SWERVE_BACK_LEFT_LOCATION,
+          Config.SWERVE_BACK_RIGHT_LOCATION);
+
+  private static final SwerveDrivetrainConstants DrivetrainConstants =
+      new SwerveDrivetrainConstants()
+          .withPigeon2Id(Config.PIGEON2_ID)
+          .withSupportsPro(true)
+          .withCANbusName(Config.CANIVORE_ID);
+  private static final SwerveModuleConstantsFactory ConstantCreator =
+      new SwerveModuleConstantsFactory()
+          .withDriveMotorGearRatio(Config.SWERVE_DRIVE_GEARING_REDUCTION)
+          .withSteerMotorGearRatio(Config.SWERVE_STEER_GEARING_REDUCTION)
+          .withWheelRadius(Config.WHEEL_DIAMETER / 2.0)
+          //  TODO: Ask Saikiran about this
+          .withSlipCurrent(800)
+          .withSteerMotorGains(
+              new CustomSlotGains(
+                  Config.SWERVE_STEER_KP,
+                  Config.SWERVE_STEER_KI,
+                  Config.SWERVE_STEER_KD,
+                  Config.SWERVE_STEER_KV,
+                  Config.SWERVE_STEER_KS))
+          .withDriveMotorGains(
+              new CustomSlotGains(
+                  Config.SWERVE_DRIVE_KP,
+                  Config.SWERVE_DRIVE_KI,
+                  Config.SWERVE_DRIVE_KD,
+                  Config.SWERVE_DRIVE_KV,
+                  Config.SWERVE_DRIVE_KS))
+          .withSpeedAt12VoltsMps(
+              6) // Theoretical free speed is 10 meters per second at 12v applied output
+          .withSteerInertia(0.0001)
+          .withDriveInertia(0.001)
+          .withFeedbackSource(SwerveModuleSteerFeedbackType.FusedCANcoder)
+          // TODO: Ask Saikran about this
+          .withCouplingGearRatio(
+              0.0) // Every 1 rotation of the azimuth results in couple ratio drive turns
+          .withSteerMotorInverted(true);
+  private static final SwerveModuleConstants FrontLeft =
+      ConstantCreator.createModuleConstants(
+          Config.SWERVE_FL_STEER_MOTOR_ID,
+          Config.SWERVE_FL_DRIVE_MOTOR_ID,
+          Config.SWERVE_FL_CANCODER_ID,
+          Rotation2d.fromDegrees(182.021484375).getRotations(),
+          Config.SWERVE_FRONT_LEFT_LOCATION.getX(),
+          Config.SWERVE_FRONT_LEFT_LOCATION.getY(),
+          true);
+  private static final SwerveModuleConstants FrontRight =
+      ConstantCreator.createModuleConstants(
+          Config.SWERVE_FR_STEER_MOTOR_ID,
+          Config.SWERVE_FR_DRIVE_MOTOR_ID,
+          Config.SWERVE_FR_CANCODER_ID,
+          Rotation2d.fromDegrees(159.521484375).getRotations(),
+          Config.SWERVE_FRONT_RIGHT_LOCATION.getX(),
+          Config.SWERVE_FRONT_RIGHT_LOCATION.getY(),
+          true);
+  private static final SwerveModuleConstants BackLeft =
+      ConstantCreator.createModuleConstants(
+          Config.SWERVE_BL_STEER_MOTOR_ID,
+          Config.SWERVE_BR_DRIVE_MOTOR_ID,
+          Config.SWERVE_BL_CANCODER_ID,
+          Rotation2d.fromDegrees(2.548828125).getRotations(),
+          Config.SWERVE_BACK_LEFT_LOCATION.getX(),
+          Config.SWERVE_BACK_LEFT_LOCATION.getY(),
+          true);
+  private static final SwerveModuleConstants BackRight =
+      ConstantCreator.createModuleConstants(
+          Config.SWERVE_BR_STEER_MOTOR_ID,
+          Config.SWERVE_BR_DRIVE_MOTOR_ID,
+          Config.SWERVE_BR_CANCODER_ID,
+          Rotation2d.fromDegrees(110.390625).getRotations(),
+          Config.SWERVE_BACK_RIGHT_LOCATION.getX(),
+          Config.SWERVE_BACK_RIGHT_LOCATION.getY(),
+          true);
+
+  private static final SwerveDrivetrain drivetrain =
+      new SwerveDrivetrain(DrivetrainConstants, FrontLeft, FrontRight, BackLeft, BackRight);
+
+  private static final double MAX_VELOCITY =
       ((6080.0 / 60.0) / Config.SWERVE_DRIVE_GEARING_REDUCTION) * (Config.WHEEL_DIAMETER * Math.PI);
-  public static final double MAX_ANGULAR_VELOCITY = 20;
+
+  private static final double MAX_ANGULAR_VELOCITY = 20;
+
+  private final SwerveRequest.FieldCentric driveRequest = new SwerveRequest.FieldCentric();
+  private final SwerveRequest.FieldCentricFacingAngle driveRequestSnaps =
+      new SwerveRequest.FieldCentricFacingAngle();
+  private final SwerveRequest.SwerveDriveBrake driveRequestX = new SwerveRequest.SwerveDriveBrake();
 
   private final ImuSubsystem imu;
-  private final SwerveModule frontRight;
-  private final SwerveModule frontLeft;
-  private final SwerveModule backRight;
-  private final SwerveModule backLeft;
-  private boolean doneResetting = false;
 
   private boolean snapToAngle = false;
-  private boolean xSwerveEnabled = false;
 
-  private final PIDController xController =
-      new PIDController(
-          Config.SWERVE_TRANSLATION_PID.kP,
-          Config.SWERVE_TRANSLATION_PID.kI,
-          Config.SWERVE_TRANSLATION_PID.kD);
-  private final PIDController yController =
-      new PIDController(
-          Config.SWERVE_TRANSLATION_PID.kP,
-          Config.SWERVE_TRANSLATION_PID.kI,
-          Config.SWERVE_TRANSLATION_PID.kD);
-  private final PIDController thetaController =
-      new PIDController(
-          Config.SWERVE_ROTATION_PID.kP,
-          Config.SWERVE_ROTATION_PID.kI,
-          Config.SWERVE_ROTATION_PID.kD);
-  private final PIDController snapThetaController =
-      new PIDController(
-          Config.SWERVE_ROTATION_SNAP_PID.kP,
-          Config.SWERVE_ROTATION_SNAP_PID.kI,
-          Config.SWERVE_ROTATION_SNAP_PID.kD);
-
-  private final ProfiledPIDController xProfiledController =
-      new ProfiledPIDController(
-          Config.SWERVE_TRANSLATION_PID.kP,
-          Config.SWERVE_TRANSLATION_PID.kI,
-          Config.SWERVE_TRANSLATION_PID.kD,
-          new TrapezoidProfile.Constraints(2.0, 1.5));
-  private final ProfiledPIDController yProfiledController =
-      new ProfiledPIDController(
-          Config.SWERVE_TRANSLATION_PID.kP,
-          Config.SWERVE_TRANSLATION_PID.kI,
-          Config.SWERVE_TRANSLATION_PID.kD,
-          new TrapezoidProfile.Constraints(2.0, 1.5));
-  private final ProfiledPIDController thetaProfiledController =
-      new ProfiledPIDController(
-          Config.SWERVE_ROTATION_PID.kP,
-          Config.SWERVE_ROTATION_PID.kI,
-          Config.SWERVE_ROTATION_PID.kD,
-          new TrapezoidProfile.Constraints(Math.PI * 2.0, Math.PI * 0.75));
   private Rotation2d goalAngle = new Rotation2d();
 
-  public SwerveSubsystem(
-      ImuSubsystem imu,
-      SwerveModule frontRight,
-      SwerveModule frontLeft,
-      SwerveModule backRight,
-      SwerveModule backLeft) {
+  private boolean xSwerveEnabled;
+
+  public SwerveSubsystem(ImuSubsystem imu) {
     super(SubsystemPriority.SWERVE);
-
     this.imu = imu;
-    this.frontRight = frontRight;
-    this.frontLeft = frontLeft;
-    this.backRight = backRight;
-    this.backLeft = backLeft;
 
-    thetaController.enableContinuousInput(-Math.PI, Math.PI);
-    snapThetaController.enableContinuousInput(-Math.PI, Math.PI);
-    thetaProfiledController.enableContinuousInput(-Math.PI, Math.PI);
-  }
-
-  @Override
-  public void robotPeriodic() {
-    frontLeft.log();
-    frontRight.log();
-    backLeft.log();
-    backRight.log();
-
-    Logger.getInstance().recordOutput("Swerve/ModuleStates", getModuleStates());
-
-    ChassisSpeeds chassisSpeeds = getChassisSpeeds();
-    Logger.getInstance().recordOutput("Swerve/ChassisSpeeds/X", chassisSpeeds.vxMetersPerSecond);
-    Logger.getInstance().recordOutput("Swerve/ChassisSpeeds/Y", chassisSpeeds.vyMetersPerSecond);
-    Logger.getInstance()
-        .recordOutput("Swerve/ChassisSpeeds/Omega", chassisSpeeds.omegaRadiansPerSecond);
-
-    Translation2d t =
-        new Translation2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
-    double velocity = t.getDistance(new Translation2d());
-    Logger.getInstance().recordOutput("Swerve/ChassisSpeeds/theta", t.getAngle().getRadians());
-    Logger.getInstance().recordOutput("Swerve/ChassisSpeeds/velocity", velocity);
-    Logger.getInstance()
-        .recordOutput(
-            "Swerve/ChassisSpeeds/spinRatio", chassisSpeeds.omegaRadiansPerSecond / velocity);
-
-    Logger.getInstance().recordOutput("Swerve/SnapToAngle/Goal", goalAngle.getDegrees());
-    Logger.getInstance().recordOutput("Swerve/SnapToAngle/Enabled", snapToAngle);
-  }
-
-  @Override
-  public void enabledPeriodic() {
-    if (xSwerveEnabled) {
-      xSwerve();
-    }
-  }
-
-  public ChassisSpeeds getChassisSpeeds() {
-    final var frontLeftState = frontLeft.getState();
-    final var frontRightState = frontRight.getState();
-    final var backLeftState = backLeft.getState();
-    final var backRightState = backRight.getState();
-
-    return KINEMATICS.toChassisSpeeds(
-        frontLeftState, frontRightState, backLeftState, backRightState);
-  }
-
-  public SwerveModuleState[] getModuleStates() {
-    return new SwerveModuleState[] {
-      frontLeft.getState(), frontRight.getState(), backLeft.getState(), backRight.getState()
-    };
-  }
-
-  public SwerveModulePosition[] getModulePositions() {
-    return new SwerveModulePosition[] {
-      frontLeft.getPosition(),
-      frontRight.getPosition(),
-      backLeft.getPosition(),
-      backRight.getPosition()
-    };
-  }
-
-  public void setSnapToAngle(Rotation2d angle) {
-    goalAngle = angle;
-    snapToAngle = true;
-  }
-
-  public void disableSnapToAngle() {
-    snapToAngle = false;
-  }
-
-  public void setXSwerve(boolean xSwerve) {
-    this.xSwerveEnabled = xSwerve;
-  }
-
-  public void setChassisSpeeds(ChassisSpeeds speeds, boolean openLoop) {
-    if (xSwerveEnabled) {
-      return;
-    }
-
-    if (snapToAngle) {
-      speeds.omegaRadiansPerSecond =
-          snapThetaController.calculate(imu.getRobotHeading().getRadians(), goalAngle.getRadians());
-    }
-    Logger.getInstance().recordOutput("Swerve/CommandedSpeeds/X", speeds.vxMetersPerSecond);
-    Logger.getInstance().recordOutput("Swerve/CommandedSpeeds/Y", speeds.vyMetersPerSecond);
-    Logger.getInstance().recordOutput("Swerve/CommandedSpeeds/Omega", speeds.omegaRadiansPerSecond);
-
-    // Twist computation.
-    double lookAheadSeconds = 0.1;
-    Pose2d target_pose =
-        new Pose2d(
-            lookAheadSeconds * speeds.vxMetersPerSecond,
-            lookAheadSeconds * speeds.vyMetersPerSecond,
-            Rotation2d.fromRadians(lookAheadSeconds * speeds.omegaRadiansPerSecond));
-    Twist2d twist = (new Pose2d()).log(target_pose);
-    speeds.vxMetersPerSecond = twist.dx / lookAheadSeconds;
-    speeds.vyMetersPerSecond = twist.dy / lookAheadSeconds;
-    speeds.omegaRadiansPerSecond = twist.dtheta / lookAheadSeconds; // omega should stay the same.
-    // Kinematics to convert target chassis speeds to module states.
-    final var moduleStates = KINEMATICS.toSwerveModuleStates(speeds);
-    setModuleStates(moduleStates, openLoop, false);
-  }
-
-  public void setModuleStates(
-      SwerveModuleState[] moduleStates, boolean openLoop, boolean skipJitterOptimization) {
-    SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, MAX_VELOCITY);
-    Logger.getInstance().recordOutput("Swerve/GoalModuleStates", moduleStates);
-    frontLeft.setDesiredState(moduleStates[0], openLoop, skipJitterOptimization);
-    frontRight.setDesiredState(moduleStates[1], openLoop, skipJitterOptimization);
-    backLeft.setDesiredState(moduleStates[2], openLoop, skipJitterOptimization);
-    backRight.setDesiredState(moduleStates[3], openLoop, skipJitterOptimization);
-  }
-
-  public void xSwerve() {
-    setModuleStates(
-        new SwerveModuleState[] {
-          new SwerveModuleState(0.0, Rotation2d.fromDegrees(45)),
-          new SwerveModuleState(0.0, Rotation2d.fromDegrees(135)),
-          new SwerveModuleState(0.0, Rotation2d.fromDegrees(135)),
-          new SwerveModuleState(0.0, Rotation2d.fromDegrees(45))
-        },
-        true,
-        true);
+    drivetrain.registerTelemetry((SwerveDrivetrain.SwerveDriveState state) -> {
+      Logger.getInstance().recordOutput("Swerve/FailedDaqs", state.FailedDaqs);
+      Logger.getInstance().recordOutput("Swerve/SuccessfulDaqs", state.SuccessfulDaqs);
+      Logger.getInstance().recordOutput("Swerve/Pose", state.Pose);
+      Logger.getInstance().recordOutput("Swerve/ModuleStates", state.ModuleStates);
+      Logger.getInstance().recordOutput("Swerve/OdometryPeriod", state.OdometryPeriod);
+    });
   }
 
   public Command getXSwerveCommand() {
@@ -243,7 +152,27 @@ public class SwerveSubsystem extends LifecycleSubsystem {
     return runOnce(() -> setXSwerve(false));
   }
 
-  public void driveTeleop(
+  public Command getDriveTeleopCommand(DriveController controller) {
+    return Commands.run(
+            () -> {
+              if (!DriverStation.isTeleopEnabled()) {
+                return;
+              }
+
+              boolean openLoop = true;
+
+              driveTeleop(
+                  -controller.getSidewaysPercentage(),
+                  controller.getForwardPercentage(),
+                  controller.getThetaPercentage(),
+                  true,
+                  openLoop);
+            },
+            this)
+        .withName("SwerveDriveTeleop");
+  }
+
+  private void driveTeleop(
       double sidewaysPercentage,
       double forwardPercentage,
       double thetaPercentage,
@@ -267,74 +196,54 @@ public class SwerveSubsystem extends LifecycleSubsystem {
     setChassisSpeeds(KINEMATICS.toChassisSpeeds(moduleStates), openLoop);
   }
 
-  public Command getDriveTeleopCommand(DriveController controller) {
-    return Commands.run(
-            () -> {
-              if (!DriverStation.isTeleopEnabled()) {
-                return;
-              }
-
-              boolean openLoop = true;
-
-              driveTeleop(
-                  -controller.getSidewaysPercentage(),
-                  controller.getForwardPercentage(),
-                  controller.getThetaPercentage(),
-                  true,
-                  openLoop);
-            },
-            this)
-        .withName("SwerveDriveTeleop");
+  public void setSnapToAngle(Rotation2d angle) {
+    goalAngle = angle;
+    snapToAngle = true;
   }
 
-  public Command getFollowTrajectoryCommand(
-      PathPlannerTrajectory traj, LocalizationSubsystem localization) {
-    return new PPSwerveControllerCommand(
-            traj,
-            localization::getPose,
-            SwerveSubsystem.KINEMATICS,
-            // x controller
-            xController,
-            // y controller
-            yController,
-            // theta controller
-            thetaController,
-            states -> setModuleStates(states, false, false),
-            false,
-            this)
-        .withName("SwerveFollowTrajectory");
+  public void disableSnapToAngle() {
+    snapToAngle = false;
   }
 
-  // Create a command that accepts a Pose2d and drives to it using a PPHolonomicDriveController
-  // The command should exit once it's at the pose
-  public Command goToPoseCommand(Pose2d goal, LocalizationSubsystem localization) {
-    return run(() -> {
-          Logger.getInstance().recordOutput("AutoAlign/TargetPose", goal);
-          Pose2d pose = localization.getPose();
-          double xVelocity = xProfiledController.calculate(pose.getX(), goal.getX());
-          double yVelocity = yProfiledController.calculate(pose.getY(), goal.getY());
-          double thetaVelocity =
-              thetaProfiledController.calculate(
-                  pose.getRotation().getRadians(), goal.getRotation().getRadians());
+  public void setChassisSpeeds(ChassisSpeeds chassisSpeeds, boolean closedLoop) {
+    if (xSwerveEnabled) {
+      drivetrain.setControl(driveRequestX);
+    } else if (snapToAngle) {
+      drivetrain.setControl(
+          driveRequestSnaps
+              .withIsOpenLoop(!closedLoop)
+              .withVelocityX(chassisSpeeds.vxMetersPerSecond)
+              .withVelocityY(chassisSpeeds.vyMetersPerSecond)
+              .withTargetDirection(goalAngle));
+    } else {
+      drivetrain.setControl(
+          driveRequest
+              .withIsOpenLoop(!closedLoop)
+              .withVelocityX(chassisSpeeds.vxMetersPerSecond)
+              .withVelocityY(chassisSpeeds.vyMetersPerSecond)
+              .withRotationalRate(chassisSpeeds.omegaRadiansPerSecond));
+    }
+  }
 
-          ChassisSpeeds chassisSpeeds =
-              ChassisSpeeds.fromFieldRelativeSpeeds(
-                  xVelocity, yVelocity, thetaVelocity, pose.getRotation());
+  public void setXSwerve(boolean enabled) {
+    this.xSwerveEnabled = enabled;
+  }
 
-          setChassisSpeeds(chassisSpeeds, false);
-        })
-        .until(
-            () -> {
-              // 3 degree rotation and 0.1 meter distance
-              Pose2d pose = localization.getPose();
-              double distanceRelative = goal.getTranslation().getDistance(pose.getTranslation());
-              Rotation2d rotationDifference = goal.getRotation().minus(pose.getRotation());
-              if (distanceRelative < 0.1 && Math.abs(rotationDifference.getDegrees()) < 3) {
-                return true;
-              } else {
-                return false;
-              }
-            })
-        .withName("SwerveGoToPose");
+  public SwerveModulePosition[] getModulePositions() {
+    return new SwerveModulePosition[] {
+      drivetrain.getModule(0).getPosition(true),
+      drivetrain.getModule(1).getPosition(true),
+      drivetrain.getModule(2).getPosition(true),
+      drivetrain.getModule(3).getPosition(true),
+    };
+  }
+
+  private SwerveModuleState[] getModuleStates() {
+    return new SwerveModuleState[] {
+      drivetrain.getModule(0).getCurrentState(),
+      drivetrain.getModule(1).getCurrentState(),
+      drivetrain.getModule(2).getCurrentState(),
+      drivetrain.getModule(3).getCurrentState(),
+    };
   }
 }

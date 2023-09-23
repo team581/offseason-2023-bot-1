@@ -4,9 +4,7 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -33,7 +31,6 @@ import frc.robot.managers.superstructure.States;
 import frc.robot.managers.superstructure.SuperstructureManager;
 import frc.robot.managers.superstructure.SuperstructureMotionManager;
 import frc.robot.shoulder.ShoulderSubsystem;
-import frc.robot.swerve.SwerveModule;
 import frc.robot.swerve.SwerveSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystemManager;
 import frc.robot.wrist.WristSubsystem;
@@ -52,30 +49,6 @@ public class Robot extends LoggedRobot {
   // Enables power distribution logging
   private final PowerDistribution pdpLogging =
       new PowerDistribution(Config.PDP_ID, ModuleType.kRev);
-  private final SwerveModule frontLeft =
-      new SwerveModule(
-          Config.SWERVE_FL_CONSTANTS,
-          new TalonFX(Config.SWERVE_FL_DRIVE_MOTOR_ID, Config.CANIVORE_ID),
-          new TalonFX(Config.SWERVE_FL_STEER_MOTOR_ID, Config.CANIVORE_ID),
-          new CANcoder(Config.SWERVE_FL_CANCODER_ID, Config.CANIVORE_ID));
-  private final SwerveModule frontRight =
-      new SwerveModule(
-          Config.SWERVE_FR_CONSTANTS,
-          new TalonFX(Config.SWERVE_FR_DRIVE_MOTOR_ID, Config.CANIVORE_ID),
-          new TalonFX(Config.SWERVE_FR_STEER_MOTOR_ID, Config.CANIVORE_ID),
-          new CANcoder(Config.SWERVE_FR_CANCODER_ID, Config.CANIVORE_ID));
-  private final SwerveModule backLeft =
-      new SwerveModule(
-          Config.SWERVE_BL_CONSTANTS,
-          new TalonFX(Config.SWERVE_BL_DRIVE_MOTOR_ID, Config.CANIVORE_ID),
-          new TalonFX(Config.SWERVE_BL_STEER_MOTOR_ID, Config.CANIVORE_ID),
-          new CANcoder(Config.SWERVE_BL_CANCODER_ID, Config.CANIVORE_ID));
-  private final SwerveModule backRight =
-      new SwerveModule(
-          Config.SWERVE_BR_CONSTANTS,
-          new TalonFX(Config.SWERVE_BR_DRIVE_MOTOR_ID, Config.CANIVORE_ID),
-          new TalonFX(Config.SWERVE_BR_STEER_MOTOR_ID, Config.CANIVORE_ID),
-          new CANcoder(Config.SWERVE_BR_CANCODER_ID, Config.CANIVORE_ID));
 
   private final DriveController driveController = new DriveController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
@@ -100,8 +73,7 @@ public class Robot extends LoggedRobot {
       new ImuSubsystem(new Pigeon2(Config.PIGEON2_ID, Config.CANIVORE_ID));
   private final SuperstructureManager superstructure =
       new SuperstructureManager(motionManager, intake, imu);
-  private final SwerveSubsystem swerve =
-      new SwerveSubsystem(imu, frontRight, frontLeft, backRight, backLeft);
+  private final SwerveSubsystem swerve = new SwerveSubsystem(imu);
 
   private final Autobalance autobalance = new Autobalance(swerve, imu);
   private final AutoRotate autoRotate = new AutoRotate(swerve);
