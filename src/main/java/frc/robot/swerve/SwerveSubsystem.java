@@ -4,12 +4,16 @@
 
 package frc.robot.swerve;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SwerveModuleSteerFeedbackType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstantsFactory;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain.SwerveDriveState;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -130,6 +134,14 @@ public class SwerveSubsystem extends LifecycleSubsystem {
   public SwerveSubsystem(ImuSubsystem imu) {
     super(SubsystemPriority.SWERVE);
     this.imu = imu;
+
+    drivetrain.registerTelemetry((SwerveDrivetrain.SwerveDriveState state) -> {
+      Logger.getInstance().recordOutput("Swerve/FailedDaqs", state.FailedDaqs);
+      Logger.getInstance().recordOutput("Swerve/SuccessfulDaqs", state.SuccessfulDaqs);
+      Logger.getInstance().recordOutput("Swerve/Pose", state.Pose);
+      Logger.getInstance().recordOutput("Swerve/ModuleStates", state.ModuleStates);
+      Logger.getInstance().recordOutput("Swerve/OdometryPeriod", state.OdometryPeriod);
+    });
   }
 
   public Command getXSwerveCommand() {
