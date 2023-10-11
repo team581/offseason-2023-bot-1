@@ -63,6 +63,9 @@ public class SwerveModule {
     steerMotorEncoder = steerMotor.getEncoder();
     steerMotorPID = steerMotor.getPIDController();
 
+    steerMotorEncoder = steerMotor.getEncoder();
+    steerMotorPID = steerMotor.getPIDController();
+
     CANcoderConfiguration cancoderConfig = new CANcoderConfiguration();
 
     cancoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;

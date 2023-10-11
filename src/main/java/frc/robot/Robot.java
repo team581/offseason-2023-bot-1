@@ -96,8 +96,7 @@ public class Robot extends LoggedRobot {
       new IntakeSubsystem(new CANSparkMax(Config.INTAKE_ID, MotorType.kBrushless));
   private final SuperstructureMotionManager motionManager =
       new SuperstructureMotionManager(shoulder, wrist);
-  private final ImuSubsystem imu =
-      new ImuSubsystem(new Pigeon2(Config.PIGEON2_ID, Config.CANIVORE_ID));
+  private final ImuSubsystem imu = new ImuSubsystem(new Pigeon2(Config.PIGEON2_ID));
   private final SuperstructureManager superstructure =
       new SuperstructureManager(motionManager, intake, imu);
   private final SwerveSubsystem swerve =
