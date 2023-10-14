@@ -19,6 +19,8 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkMax.IdleMode;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -43,8 +45,9 @@ public class SwerveModule {
 
   private StatusSignal<Double> driveMotorStatorCurrent;
 
-  private final RelativeEncoder steerMotorEncoder;
+  private final  CANcoder cancoder;
 
+  private final RelativeEncoder steerMotorEncoder;
   private final SparkMaxPIDController steerMotorPID;
 
   public SwerveModule(
@@ -55,6 +58,7 @@ public class SwerveModule {
     this.constants = constants;
     this.driveMotor = driveMotor;
     this.steerMotor = steerMotor;
+    this.cancoder = cancoder;
 
     steerMotorEncoder = steerMotor.getEncoder();
     steerMotorPID = steerMotor.getPIDController();
@@ -96,27 +100,27 @@ public class SwerveModule {
       System.out.println("Could not apply configs, error code: " + driveStatus.toString());
     }
 
-    // steerMotorConfigs.Feedback.FeedbackRemoteSensorID = cancoder.getDeviceID();
-    // steerMotorConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
-    // steerMotorConfigs.Feedback.SensorToMechanismRatio = 1.0;
-    // steerMotorConfigs.Feedback.RotorToSensorRatio = Config.SWERVE_STEER_GEARING_REDUCTION;
-
-    // steerMotorConfigs.CurrentLimits.SupplyCurrentLimit = 35;
-    // steerMotorConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
-    // steerMotorConfigs.MotorOutput.DutyCycleNeutralDeadband = 0;
-
-    // steerMotorConfigs.Feedback.SensorToMechanismRatio = Config.SWERVE_STEER_GEARING_REDUCTION;
-
     driveMotorStatorCurrent = driveMotor.getStatorCurrent();
 
     steerMotorPID.setP(Config.SWERVE_STEER_KP);
     steerMotorPID.setI(Config.SWERVE_STEER_KI);
     steerMotorPID.setD(Config.SWERVE_STEER_KD);
+    steerMotorPID.setFF(Config.SWERVE_STEER_KV);
     steerMotorPID.setFeedbackDevice(steerMotorEncoder);
+    steerMotor.setIdleMode(IdleMode.kBrake);
+
+    steerMotorEncoder.setPositionConversionFactor(Config.SWERVE_STEER_GEARING_REDUCTION);
+    steerMotorEncoder.setVelocityConversionFactor(Config.SWERVE_STEER_GEARING_REDUCTION);
+
+    steerMotorPID.setPositionPIDWrappingEnabled(true);
+    steerMotorPID.setPositionPIDWrappingMinInput(Config.SWERVE_STEER_GEARING_REDUCTION);
 
     steerMotor.setSmartCurrentLimit(35);
 
     steerMotor.setInverted(constants.angleInversion);
+    steerMotorEncoder.setInverted(constants.angleInversion);
+
+
 
     steerMotor.burnFlash();
   }
@@ -163,6 +167,11 @@ public class SwerveModule {
     final var driveMotorPosition = getDriveMotorPosition();
 
     return new SwerveModulePosition(driveMotorPosition, steerMotorPosition);
+  }
+
+  public void resetSteerMotorAngle() {
+    double absoluteAngle = cancoder.getAbsolutePosition().getValue();
+    steerMotorEncoder.setPosition(absoluteAngle);
   }
 
   private Rotation2d getSteerMotorPosition() {

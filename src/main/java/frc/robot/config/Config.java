@@ -46,7 +46,6 @@ public class Config {
   public static final double SWERVE_STEER_KP = 5.0;
   public static final double SWERVE_STEER_KI = 0.0;
   public static final double SWERVE_STEER_KD = 0.0;
-  public static final double SWERVE_STEER_KS = 0.0;
 
   public static final int SWERVE_DRIVE_VOLTAGE_PEAK_FORWARD_VOLTAGE = 12;
   public static final int SWERVE_DRIVE_VOLTAGE_PEAK_REVERSE_VOLTAGE = -12;
