@@ -146,6 +146,14 @@ public class SwerveSubsystem extends LifecycleSubsystem {
     }
   }
 
+  @Override
+  public void disabledPeriodic() {
+    frontLeft.resetSteerMotorAngle();
+    frontRight.resetSteerMotorAngle();
+    backLeft.resetSteerMotorAngle();
+    backLeft.resetSteerMotorAngle();
+  }
+
   public ChassisSpeeds getChassisSpeeds() {
     final var frontLeftState = frontLeft.getState();
     final var frontRightState = frontRight.getState();
