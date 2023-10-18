@@ -17,10 +17,9 @@ import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
-import com.revrobotics.CANSparkMax.IdleMode;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -45,7 +44,7 @@ public class SwerveModule {
 
   private StatusSignal<Double> driveMotorStatorCurrent;
 
-  private final  CANcoder cancoder;
+  private final CANcoder cancoder;
 
   private final RelativeEncoder steerMotorEncoder;
   private final SparkMaxPIDController steerMotorPID;
@@ -119,8 +118,6 @@ public class SwerveModule {
 
     steerMotor.setInverted(constants.angleInversion);
     steerMotorEncoder.setInverted(constants.angleInversion);
-
-
 
     steerMotor.burnFlash();
   }
