@@ -18,8 +18,6 @@ public class Config {
   // TODO: Change this to false during events
   public static final boolean IS_DEVELOPMENT = true;
 
-  public static final String CANIVORE_ID = "581CANivore";
-
   public static final int SHOULDER_ID = 14;
   public static final int SHOULDER2_ID = 15;
   public static final int PIGEON2_ID = 1;
@@ -43,19 +41,20 @@ public class Config {
   public static final double SWERVE_DRIVE_GEARING_REDUCTION =
       50.0 * 16.0 * 45.0 / 14.0 / 28.0 / 15.0;
   public static final double SWERVE_STEER_KV = 0.0;
-  public static final double SWERVE_STEER_KP = 5.0;
+  public static final double SWERVE_STEER_KP = 0.0;
   public static final double SWERVE_STEER_KI = 0.0;
   public static final double SWERVE_STEER_KD = 0.0;
+  public static final double SWERVE_STEER_KS = 0.0;
 
   public static final int SWERVE_DRIVE_VOLTAGE_PEAK_FORWARD_VOLTAGE = 12;
   public static final int SWERVE_DRIVE_VOLTAGE_PEAK_REVERSE_VOLTAGE = -12;
   public static final double SWERVE_DRIVE_CURRENT_LIMIT = 35.0;
   public static final boolean SWERVE_DRIVE_LIMITS_ENABLE = true;
 
-  public static final double SWERVE_DRIVE_KP = 0.24;
+  public static final double SWERVE_DRIVE_KP = 0.0;
   public static final double SWERVE_DRIVE_KI = 0.0;
   public static final double SWERVE_DRIVE_KD = 0.0;
-  public static final double SWERVE_DRIVE_KV = 0.1185;
+  public static final double SWERVE_DRIVE_KV = 0.0;
   public static final double SWERVE_DRIVE_KS = 0.0;
 
   public static final double STEER_MOTOR_LIMITS = 35;

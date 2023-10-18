@@ -31,9 +31,10 @@ public class ShoulderSubsystem extends LifecycleSubsystem {
     motor.setSmartCurrentLimit(35);
     followerMotor.setSmartCurrentLimit(35);
 
-    pid.setP(5);
+    pid.setP(0);
     pid.setI(0);
     pid.setD(0);
+    pid.setFF(0);
 
     encoder.setPosition(0);
     encoder.setPositionConversionFactor(50);
