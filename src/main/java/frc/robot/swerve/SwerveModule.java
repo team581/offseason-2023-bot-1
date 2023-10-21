@@ -117,7 +117,6 @@ public class SwerveModule {
     steerMotor.setSmartCurrentLimit(35);
 
     steerMotor.setInverted(constants.angleInversion);
-    steerMotorEncoder.setInverted(constants.angleInversion);
 
     steerMotor.burnFlash();
   }

@@ -50,8 +50,8 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
  */
 public class Robot extends LoggedRobot {
   // Enables power distribution logging
-  private final PowerDistribution pdpLogging =
-      new PowerDistribution(Config.PDP_ID, ModuleType.kRev);
+  // private final PowerDistribution pdpLogging =
+  //     new PowerDistribution(Config.PDP_ID, ModuleType.kRev);
   private final SwerveModule frontLeft =
       new SwerveModule(
           Config.SWERVE_FL_CONSTANTS,
@@ -97,7 +97,7 @@ public class Robot extends LoggedRobot {
   private final SuperstructureMotionManager motionManager =
       new SuperstructureMotionManager(shoulder, wrist);
   private final ImuSubsystem imu =
-      new ImuSubsystem(new Pigeon2(Config.PIGEON2_ID, Config.CANIVORE_ID));
+      new ImuSubsystem(new Pigeon2(Config.PIGEON2_ID));
   private final SuperstructureManager superstructure =
       new SuperstructureManager(motionManager, intake, imu);
   private final SwerveSubsystem swerve =

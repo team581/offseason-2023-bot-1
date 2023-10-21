@@ -17,7 +17,7 @@ public class IntakeSubsystem extends LifecycleSubsystem {
   // 7 is a placeholder not tuned
   private final CANSparkMax motor;
   private final RelativeEncoder encoder;
-  private IntakeState goalState;
+  private IntakeState goalState = IntakeState.STOPPED;
   private HeldGamePiece gamePiece = HeldGamePiece.NOTHING;
 
   public IntakeSubsystem(CANSparkMax motor) {

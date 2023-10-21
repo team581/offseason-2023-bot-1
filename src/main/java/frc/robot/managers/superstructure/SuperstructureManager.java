@@ -23,7 +23,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
   private final ShoulderSubsystem shoulder;
   private final WristSubsystem wrist;
   private final IntakeSubsystem intake;
-  private SuperstructureState goalState;
+  private SuperstructureState goalState = States.STOWED;
   private HeldGamePiece mode = HeldGamePiece.CUBE;
   private NodeHeight scoringHeight = null;
   private IntakeState manualIntakeState = null;
