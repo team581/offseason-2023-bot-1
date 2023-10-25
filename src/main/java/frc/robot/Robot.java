@@ -9,8 +9,6 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -96,8 +94,7 @@ public class Robot extends LoggedRobot {
       new IntakeSubsystem(new CANSparkMax(Config.INTAKE_ID, MotorType.kBrushless));
   private final SuperstructureMotionManager motionManager =
       new SuperstructureMotionManager(shoulder, wrist);
-  private final ImuSubsystem imu =
-      new ImuSubsystem(new Pigeon2(Config.PIGEON2_ID));
+  private final ImuSubsystem imu = new ImuSubsystem(new Pigeon2(Config.PIGEON2_ID));
   private final SuperstructureManager superstructure =
       new SuperstructureManager(motionManager, intake, imu);
   private final SwerveSubsystem swerve =

@@ -25,19 +25,19 @@ public class WristSubsystem extends LifecycleSubsystem {
     this.motor = motor;
     encoder = motor.getEncoder();
     pid = motor.getPIDController();
-    motor.setSmartCurrentLimit(35);
-    pid.setP(0);
-    pid.setI(0);
-    pid.setD(0);
-    pid.setFF(0);
+    motor.setSmartCurrentLimit(15);
+    pid.setP(5.0);
+    pid.setI(0.0);
+    pid.setD(0.0);
+    pid.setFF(0.0);
 
-    encoder.setPosition(0);
-    encoder.setPositionConversionFactor(50);
+    encoder.setPosition(Rotation2d.fromDegrees(-74.0).getRotations());
+    encoder.setPositionConversionFactor(1.0 / 40.9);
   }
 
   @Override
   public void enabledPeriodic() {
-    pid.setReference(goalAngle.getRotations(), ControlType.kSmartMotion);
+    pid.setReference(goalAngle.getRotations(), ControlType.kPosition);
   }
 
   @Override

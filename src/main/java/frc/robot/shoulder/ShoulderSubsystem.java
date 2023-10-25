@@ -28,21 +28,21 @@ public class ShoulderSubsystem extends LifecycleSubsystem {
     followerMotor.follow(motor);
     encoder = motor.getEncoder();
     pid = motor.getPIDController();
-    motor.setSmartCurrentLimit(35);
-    followerMotor.setSmartCurrentLimit(35);
+    motor.setSmartCurrentLimit(15);
+    followerMotor.setSmartCurrentLimit(15);
 
-    pid.setP(0);
-    pid.setI(0);
-    pid.setD(0);
-    pid.setFF(0);
+    pid.setP(5.0);
+    pid.setI(0.0);
+    pid.setD(0.0);
+    pid.setFF(0.0);
 
-    encoder.setPosition(0);
-    encoder.setPositionConversionFactor(50);
+    encoder.setPosition(Rotation2d.fromDegrees(15.2).getRotations());
+    encoder.setPositionConversionFactor(1.0 / (280.0 / 3.0));
   }
 
   @Override
   public void enabledPeriodic() {
-    pid.setReference(goalAngle.getRotations(), ControlType.kSmartMotion);
+    pid.setReference(goalAngle.getRotations(), ControlType.kPosition);
   }
 
   @Override
@@ -60,6 +60,8 @@ public class ShoulderSubsystem extends LifecycleSubsystem {
     Logger.getInstance().recordOutput("Shoulder/MainMotor/StatorCurrent", motor.getOutputCurrent());
     Logger.getInstance()
         .recordOutput("Shoulder/FollowerMotor/StatorCurrent", motor.getOutputCurrent());
+    Logger.getInstance()
+        .recordOutput("Shoulder/ConversionFactor", encoder.getPositionConversionFactor());
   }
 
   public void set(Rotation2d angle) {
