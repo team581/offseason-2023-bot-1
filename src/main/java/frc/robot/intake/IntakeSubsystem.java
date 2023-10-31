@@ -24,6 +24,7 @@ public class IntakeSubsystem extends LifecycleSubsystem {
     super(SubsystemPriority.INTAKE);
     this.motor = motor;
     encoder = motor.getEncoder();
+    encoder.setVelocityConversionFactor(1.0);
   }
 
   public void setGoalState(IntakeState intakeState) {
@@ -50,15 +51,15 @@ public class IntakeSubsystem extends LifecycleSubsystem {
     if (goalState == IntakeState.OUTTAKE_CONE) {
       motor.set(0.4);
     } else if (goalState == IntakeState.OUTTAKE_CUBE) {
-      motor.set(-0.3);
+      motor.set(0.3);
     } else if (gamePiece == HeldGamePiece.CUBE) {
-      motor.set(0.15);
+      motor.set(-0.6);
     } else if (gamePiece == HeldGamePiece.CONE) {
-      motor.set(-0.1);
+      motor.set(-0.6);
     } else if (goalState == IntakeState.INTAKE_CUBE) {
-      motor.set(0.5);
+      motor.set(-0.6);
     } else if (goalState == IntakeState.INTAKE_CONE) {
-      motor.set(-1);
+      motor.set(-0.6);
     } else {
       motor.disable();
     }
@@ -68,14 +69,18 @@ public class IntakeSubsystem extends LifecycleSubsystem {
     double intakeVoltage = voltageFilter.calculate(motor.getAppliedOutput()) * 12.0;
     double theoreticalSpeed = intakeVoltage * (5700.0 / 12.0); // Neo Max is 5700
     double threshold = theoreticalSpeed * 0.5;
+    Logger.getInstance().recordOutput("Intake/MotorVelocity", motorVelocity);
+    Logger.getInstance().recordOutput("Intake/IntakeVoltage", intakeVoltage);
+    Logger.getInstance().recordOutput("Intake/TheoreticalSpeed", theoreticalSpeed);
+    Logger.getInstance().recordOutput("Intake/Threshold", threshold);
     if (motorVelocity < threshold && goalState == IntakeState.INTAKE_CONE) {
       gamePiece = HeldGamePiece.CONE;
     } else if (motorVelocity < threshold && goalState == IntakeState.INTAKE_CUBE) {
       gamePiece = HeldGamePiece.CUBE;
-    } else if (motorVelocity > threshold
-        && (goalState == IntakeState.OUTTAKE_CONE || goalState == IntakeState.OUTTAKE_CUBE)) {
-      gamePiece = HeldGamePiece.NOTHING;
-    }
+    } //else if (motorVelocity > threshold
+    //     && (goalState == IntakeState.OUTTAKE_CONE || goalState == IntakeState.OUTTAKE_CUBE)) {
+    //   gamePiece = HeldGamePiece.NOTHING;
+    // }
   }
 
   public IntakeState getIntakeState() {

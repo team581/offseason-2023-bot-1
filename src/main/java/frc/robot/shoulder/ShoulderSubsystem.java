@@ -70,7 +70,7 @@ public class ShoulderSubsystem extends LifecycleSubsystem {
 
   public boolean atAngle(Rotation2d angle) {
     double actualAngle = getWristAngle().getDegrees();
-    return Math.abs(actualAngle - angle.getDegrees()) < 1;
+    return Math.abs(actualAngle - angle.getDegrees()) < 5;
   }
 
   private Rotation2d getWristAngle() {

@@ -20,9 +20,9 @@ public class Positions {
   public static final SuperstructurePosition CUBE_NODE_LOW_BACK =
       new SuperstructurePosition(Rotation2d.fromDegrees(4.7), Rotation2d.fromDegrees(93.9));
   public static final SuperstructurePosition CUBE_NODE_MID =
-      new SuperstructurePosition(Rotation2d.fromDegrees(-75), Rotation2d.fromDegrees(-190));
+      new SuperstructurePosition(Rotation2d.fromDegrees(75), Rotation2d.fromDegrees(190));
   public static final SuperstructurePosition CUBE_NODE_HIGH =
-      new SuperstructurePosition(Rotation2d.fromDegrees(-100), Rotation2d.fromDegrees(-190));
+      new SuperstructurePosition(Rotation2d.fromDegrees(100), Rotation2d.fromDegrees(190));
 
   public static final SuperstructurePosition INTAKING_CONE_FLOOR =
       new SuperstructurePosition(Rotation2d.fromDegrees(10.3), Rotation2d.fromDegrees(122.0));
@@ -34,14 +34,14 @@ public class Positions {
   public static final SuperstructurePosition CONE_NODE_LOW_FRONT =
       new SuperstructurePosition(Rotation2d.fromDegrees(-19), Rotation2d.fromDegrees(-118.6));
   public static final SuperstructurePosition CONE_NODE_LOW_BACK =
-      new SuperstructurePosition(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(91.4));
+      new SuperstructurePosition(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(89));
   public static final SuperstructurePosition CONE_NODE_MID =
-      new SuperstructurePosition(Rotation2d.fromDegrees(-75), Rotation2d.fromDegrees(-190));
+      new SuperstructurePosition(Rotation2d.fromDegrees(75), Rotation2d.fromDegrees(190));
   public static final SuperstructurePosition CONE_NODE_HIGH =
-      new SuperstructurePosition(Rotation2d.fromDegrees(-100), Rotation2d.fromDegrees(-190));
+      new SuperstructurePosition(Rotation2d.fromDegrees(100), Rotation2d.fromDegrees(190));
 
   public static final SuperstructurePosition YEET_CONE =
-      new SuperstructurePosition(Rotation2d.fromDegrees(-50), Rotation2d.fromDegrees(-135));
+      new SuperstructurePosition(Rotation2d.fromDegrees(50), Rotation2d.fromDegrees(135));
 
   private Positions() {}
 }

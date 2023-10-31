@@ -4,6 +4,7 @@
 
 package frc.robot.managers.superstructure;
 
+import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.imu.ImuSubsystem;
@@ -16,6 +17,8 @@ import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
 import frc.robot.wrist.WristSubsystem;
 import java.util.function.Supplier;
+
+import org.littletonrobotics.junction.Logger;
 
 public class SuperstructureManager extends LifecycleSubsystem {
   private final ImuSubsystem imu;
@@ -60,6 +63,14 @@ public class SuperstructureManager extends LifecycleSubsystem {
     } else if (motionManager.atPosition(goalState.position) || goalState.intakeNow) {
       intake.setGoalState(goalState.intakeState);
     }
+  }
+
+  @Override
+  public void robotPeriodic() {
+      Logger.getInstance().recordOutput("Superstructure/GoalState/GoalWristAngle", goalState.position.wristAngle.getDegrees());
+      Logger.getInstance().recordOutput("Superstructure/GoalState/GoalShoulderAngle", goalState.position.shoulderAngle.getDegrees());
+      Logger.getInstance().recordOutput("Superstructure/GoalState/GoalIntakeState", goalState.intakeState.toString());
+      Logger.getInstance().recordOutput("Superstructure/GoalState/GoalIntakeNow", goalState.intakeNow);
   }
 
   public void setIntakeOverride(IntakeState intakeState) {
@@ -132,17 +143,18 @@ public class SuperstructureManager extends LifecycleSubsystem {
     SuperstructureScoringState coneState;
 
     if (height == NodeHeight.LOW) {
-      double heading = imu.getRobotHeading().getDegrees();
-      double leftAngle = AutoRotate.getLeftAngle().getDegrees();
-      double rightAngle = AutoRotate.getRightAngle().getDegrees();
-      if (heading < leftAngle && heading > rightAngle) {
-        cubeState = States.CUBE_NODE_LOW_FRONT;
-        coneState = States.CONE_NODE_LOW_FRONT;
-      } else {
+      // double heading = imu.getRobotHeading().getDegrees();
+      // double leftAngle = AutoRotate.getLeftAngle().getDegrees();
+      // double rightAngle = AutoRotate.getRightAngle().getDegrees();
+      // if (heading < leftAngle && heading > rightAngle) {
+      //   cubeState = States.CUBE_NODE_LOW_FRONT;
+      //   coneState = States.CONE_NODE_LOW_FRONT;
+      // } else {
+      //   cubeState = States.CUBE_NODE_LOW_BACK;
+      //   coneState = States.CONE_NODE_LOW_BACK;
+      // }
         cubeState = States.CUBE_NODE_LOW_BACK;
         coneState = States.CONE_NODE_LOW_BACK;
-      }
-
     } else if (height == NodeHeight.MID) {
       cubeState = States.CUBE_NODE_MID;
       coneState = States.CONE_NODE_MID;
@@ -177,6 +189,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
               scoringHeight = height;
               scoringProgress = ScoringProgress.PLACING;
             })
+        .andThen(setStateCommand(getScoringState(height).aligning))
         .andThen(setStateCommand(getScoringState(height).scoring))
         .andThen(
             Commands.runOnce(

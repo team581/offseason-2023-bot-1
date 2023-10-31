@@ -25,7 +25,7 @@ public class WristSubsystem extends LifecycleSubsystem {
     this.motor = motor;
     encoder = motor.getEncoder();
     pid = motor.getPIDController();
-    motor.setSmartCurrentLimit(15);
+    motor.setSmartCurrentLimit(25);
     pid.setP(5.0);
     pid.setI(0.0);
     pid.setD(0.0);
@@ -55,7 +55,7 @@ public class WristSubsystem extends LifecycleSubsystem {
 
   public boolean atAngle(Rotation2d angle) {
     double actualAngle = getWristAngle().getDegrees();
-    return Math.abs(actualAngle - angle.getDegrees()) < 1;
+    return Math.abs(actualAngle - angle.getDegrees()) < 5;
   }
 
   private Rotation2d getWristAngle() {
