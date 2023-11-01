@@ -101,6 +101,9 @@ public class SwerveModule {
 
     driveMotorStatorCurrent = driveMotor.getStatorCurrent();
 
+    // TODO: super temporary, remove this after 10/31/2023
+    steerMotor.restoreFactoryDefaults();
+
     steerMotorPID.setP(Config.SWERVE_STEER_KP);
     steerMotorPID.setI(Config.SWERVE_STEER_KI);
     steerMotorPID.setD(Config.SWERVE_STEER_KD);
@@ -126,6 +129,22 @@ public class SwerveModule {
         .recordOutput(
             "Swerve/" + constants.corner.toString() + "/DriveMotorStatorCurrent",
             driveMotorStatorCurrent.refresh().getValue());
+    Logger.getInstance()
+        .recordOutput(
+            "Swerve/" + constants.corner.toString() + "/SteerMotorPosition",
+            getSteerMotorPosition().getDegrees());
+    Logger.getInstance()
+        .recordOutput(
+            "Swerve/" + constants.corner.toString() + "/CANCoderPositionWithOffset",
+            getCancoderAngle().getDegrees());
+    Logger.getInstance()
+        .recordOutput(
+            "Swerve/" + constants.corner.toString() + "/CANCoderPositionNoOffset",
+            getCancoderAngle().minus(constants.angleOffset).getDegrees());
+     Logger.getInstance()
+        .recordOutput(
+            "Swerve/" + constants.corner.toString() + "/EncoderConversionFactor",
+            steerMotorEncoder.getPositionConversionFactor());
   }
 
   public void setDesiredState(
@@ -165,9 +184,12 @@ public class SwerveModule {
     return new SwerveModulePosition(driveMotorPosition, steerMotorPosition);
   }
 
+  private Rotation2d getCancoderAngle() {
+    return Rotation2d.fromRotations(cancoder.getAbsolutePosition().getValue());
+  }
+
   public void resetSteerMotorAngle() {
-    double absoluteAngle = cancoder.getAbsolutePosition().getValue();
-    steerMotorEncoder.setPosition(absoluteAngle);
+    steerMotorEncoder.setPosition(getCancoderAngle().getRotations());
   }
 
   private Rotation2d getSteerMotorPosition() {

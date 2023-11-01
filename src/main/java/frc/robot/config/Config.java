@@ -38,10 +38,11 @@ public class Config {
 
   public static final double WHEEL_DIAMETER = Units.inchesToMeters(3.84);
   public static final double SWERVE_STEER_GEARING_REDUCTION = 150.0 / 7.0;
+
   public static final double SWERVE_DRIVE_GEARING_REDUCTION =
       50.0 * 16.0 * 45.0 / 14.0 / 28.0 / 15.0;
   public static final double SWERVE_STEER_KV = 0.0;
-  public static final double SWERVE_STEER_KP = 0.0;
+  public static final double SWERVE_STEER_KP = 0.1;
   public static final double SWERVE_STEER_KI = 0.0;
   public static final double SWERVE_STEER_KD = 0.0;
   public static final double SWERVE_STEER_KS = 0.0;
@@ -90,7 +91,7 @@ public class Config {
   public static final int SWERVE_BR_CANCODER_ID = 13;
   public static final SwerveModuleConstants SWERVE_BR_CONSTANTS =
       new SwerveModuleConstants(
-          Rotation2d.fromDegrees(32.08).unaryMinus(), SwerveCorner.BACK_RIGHT, true, true);
+          Rotation2d.fromDegrees(-32.08).unaryMinus(), SwerveCorner.BACK_RIGHT, true, true);
 
   private Config() {}
 }

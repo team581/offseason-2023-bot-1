@@ -4,20 +4,17 @@
 
 package frc.robot.managers.superstructure;
 
-import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.imu.ImuSubsystem;
 import frc.robot.intake.HeldGamePiece;
 import frc.robot.intake.IntakeState;
 import frc.robot.intake.IntakeSubsystem;
-import frc.robot.managers.autorotate.AutoRotate;
 import frc.robot.shoulder.ShoulderSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
 import frc.robot.wrist.WristSubsystem;
 import java.util.function.Supplier;
-
 import org.littletonrobotics.junction.Logger;
 
 public class SuperstructureManager extends LifecycleSubsystem {
@@ -67,10 +64,17 @@ public class SuperstructureManager extends LifecycleSubsystem {
 
   @Override
   public void robotPeriodic() {
-      Logger.getInstance().recordOutput("Superstructure/GoalState/GoalWristAngle", goalState.position.wristAngle.getDegrees());
-      Logger.getInstance().recordOutput("Superstructure/GoalState/GoalShoulderAngle", goalState.position.shoulderAngle.getDegrees());
-      Logger.getInstance().recordOutput("Superstructure/GoalState/GoalIntakeState", goalState.intakeState.toString());
-      Logger.getInstance().recordOutput("Superstructure/GoalState/GoalIntakeNow", goalState.intakeNow);
+    Logger.getInstance()
+        .recordOutput(
+            "Superstructure/GoalState/GoalWristAngle", goalState.position.wristAngle.getDegrees());
+    Logger.getInstance()
+        .recordOutput(
+            "Superstructure/GoalState/GoalShoulderAngle",
+            goalState.position.shoulderAngle.getDegrees());
+    Logger.getInstance()
+        .recordOutput("Superstructure/GoalState/GoalIntakeState", goalState.intakeState.toString());
+    Logger.getInstance()
+        .recordOutput("Superstructure/GoalState/GoalIntakeNow", goalState.intakeNow);
   }
 
   public void setIntakeOverride(IntakeState intakeState) {
@@ -153,8 +157,8 @@ public class SuperstructureManager extends LifecycleSubsystem {
       //   cubeState = States.CUBE_NODE_LOW_BACK;
       //   coneState = States.CONE_NODE_LOW_BACK;
       // }
-        cubeState = States.CUBE_NODE_LOW_BACK;
-        coneState = States.CONE_NODE_LOW_BACK;
+      cubeState = States.CUBE_NODE_LOW_BACK;
+      coneState = States.CONE_NODE_LOW_BACK;
     } else if (height == NodeHeight.MID) {
       cubeState = States.CUBE_NODE_MID;
       coneState = States.CONE_NODE_MID;

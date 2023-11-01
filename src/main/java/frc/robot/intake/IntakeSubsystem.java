@@ -77,7 +77,7 @@ public class IntakeSubsystem extends LifecycleSubsystem {
       gamePiece = HeldGamePiece.CONE;
     } else if (motorVelocity < threshold && goalState == IntakeState.INTAKE_CUBE) {
       gamePiece = HeldGamePiece.CUBE;
-    } //else if (motorVelocity > threshold
+    } // else if (motorVelocity > threshold
     //     && (goalState == IntakeState.OUTTAKE_CONE || goalState == IntakeState.OUTTAKE_CUBE)) {
     //   gamePiece = HeldGamePiece.NOTHING;
     // }
