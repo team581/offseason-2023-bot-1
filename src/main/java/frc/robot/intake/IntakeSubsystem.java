@@ -6,6 +6,7 @@ package frc.robot.intake;
 
 import com.revrobotics.*;
 import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
 import org.littletonrobotics.junction.Logger;
@@ -19,6 +20,7 @@ public class IntakeSubsystem extends LifecycleSubsystem {
   private final RelativeEncoder encoder;
   private IntakeState goalState = IntakeState.STOPPED;
   private HeldGamePiece gamePiece = HeldGamePiece.NOTHING;
+  private final Timer intakeTimer = new Timer();
 
   public IntakeSubsystem(CANSparkMax motor) {
     super(SubsystemPriority.INTAKE);
@@ -27,14 +29,17 @@ public class IntakeSubsystem extends LifecycleSubsystem {
     encoder.setVelocityConversionFactor(1.0);
   }
 
-  public void setGoalState(IntakeState intakeState) {
-    if (goalState != intakeState) {
-      if (goalState == IntakeState.INTAKE_CONE || goalState == IntakeState.INTAKE_CUBE) {
+  public void setGoalState(IntakeState newState) {
+    if (goalState != newState) {
+      if (newState == IntakeState.INTAKE_CONE || newState == IntakeState.INTAKE_CUBE) {
         gamePiece = HeldGamePiece.NOTHING;
       }
+
+      intakeTimer.reset();
+      intakeTimer.start();
     }
 
-    goalState = intakeState;
+    goalState = newState;
   }
 
   @Override
@@ -73,14 +78,17 @@ public class IntakeSubsystem extends LifecycleSubsystem {
     Logger.getInstance().recordOutput("Intake/IntakeVoltage", intakeVoltage);
     Logger.getInstance().recordOutput("Intake/TheoreticalSpeed", theoreticalSpeed);
     Logger.getInstance().recordOutput("Intake/Threshold", threshold);
-    if (motorVelocity < threshold && goalState == IntakeState.INTAKE_CONE) {
-      gamePiece = HeldGamePiece.CONE;
-    } else if (motorVelocity < threshold && goalState == IntakeState.INTAKE_CUBE) {
-      gamePiece = HeldGamePiece.CUBE;
-    } //else if (motorVelocity > threshold
-    //     && (goalState == IntakeState.OUTTAKE_CONE || goalState == IntakeState.OUTTAKE_CUBE)) {
-    //   gamePiece = HeldGamePiece.NOTHING;
-    // }
+    if (intakeTimer.hasElapsed(0.25)) {
+      if (motorVelocity < threshold && goalState == IntakeState.INTAKE_CONE) {
+        gamePiece = HeldGamePiece.CONE;
+      } else if (motorVelocity < threshold && goalState == IntakeState.INTAKE_CUBE) {
+        gamePiece = HeldGamePiece.CUBE;
+      }
+      // } else if (motorVelocity > threshold
+      //     && (goalState == IntakeState.OUTTAKE_CONE || goalState == IntakeState.OUTTAKE_CUBE)) {
+      //   gamePiece = HeldGamePiece.NOTHING;
+      // }
+    }
   }
 
   public IntakeState getIntakeState() {
