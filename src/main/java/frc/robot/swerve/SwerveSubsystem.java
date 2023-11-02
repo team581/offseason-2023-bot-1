@@ -151,7 +151,7 @@ public class SwerveSubsystem extends LifecycleSubsystem {
     frontLeft.resetSteerMotorAngle();
     frontRight.resetSteerMotorAngle();
     backLeft.resetSteerMotorAngle();
-    backLeft.resetSteerMotorAngle();
+    backRight.resetSteerMotorAngle();
   }
 
   public ChassisSpeeds getChassisSpeeds() {
