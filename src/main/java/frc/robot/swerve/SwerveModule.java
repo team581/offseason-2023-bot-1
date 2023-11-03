@@ -17,8 +17,8 @@ import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.REVLibError;
 import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -145,7 +145,7 @@ public class SwerveModule {
         .recordOutput(
             "Swerve/" + constants.corner.toString() + "/CANCoderPositionNoOffset",
             getCancoderAngle().minus(constants.angleOffset).getDegrees());
-     Logger.getInstance()
+    Logger.getInstance()
         .recordOutput(
             "Swerve/" + constants.corner.toString() + "/EncoderConversionFactor",
             steerMotorEncoder.getPositionConversionFactor());
@@ -193,13 +193,11 @@ public class SwerveModule {
   }
 
   public void resetSteerMotorAngle() {
-    if (! setAngle){
+    if (!setAngle) {
       REVLibError error = steerMotorEncoder.setPosition(getCancoderAngle().getRotations());
       Logger.getInstance()
-        .recordOutput(
-            "Swerve/" + constants.corner.toString() + "/SetError",
-            error.toString());
-      if(error == REVLibError.kOk){
+          .recordOutput("Swerve/" + constants.corner.toString() + "/SetError", error.toString());
+      if (error == REVLibError.kOk) {
         setAngle = true;
       }
     }
