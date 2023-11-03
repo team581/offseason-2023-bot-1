@@ -118,28 +118,43 @@ public class SuperstructureManager extends LifecycleSubsystem {
 
   public Command getIntakeFloorCommand() {
     return setStateCommand(
-        () -> {
-          if (mode == HeldGamePiece.CONE) {
-            return States.INTAKING_CONE_FLOOR;
-          } else {
-            return States.INTAKING_CUBE_FLOOR;
-          }
-        });
+            () -> {
+              if (mode == HeldGamePiece.CONE) {
+                return States.INTAKING_CONE_FLOOR;
+              } else {
+                return States.INTAKING_CUBE_FLOOR;
+              }
+            })
+        .andThen(
+            Commands.runOnce(
+                () -> {
+                  setGoal(States.STOWED);
+                }));
   }
 
   public Command getIntakeShelfCommand() {
     return setStateCommand(
-        () -> {
-          if (mode == HeldGamePiece.CONE) {
-            return States.INTAKING_CONE_SHELF;
-          } else {
-            return States.INTAKING_CUBE_SHELF;
-          }
-        });
+            () -> {
+              if (mode == HeldGamePiece.CONE) {
+                return States.INTAKING_CONE_SHELF;
+              } else {
+                return States.INTAKING_CUBE_SHELF;
+              }
+            })
+        .andThen(
+            Commands.runOnce(
+                () -> {
+                  setGoal(States.STOWED);
+                }));
   }
 
   public Command getIntakeSingleSubstationCommand() {
-    return setStateCommand(States.INTAKING_CONE_SINGLE_SUBSTATION);
+    return setStateCommand(States.INTAKING_CONE_SINGLE_SUBSTATION)
+        .andThen(
+            Commands.runOnce(
+                () -> {
+                  setGoal(States.STOWED);
+                }));
   }
 
   private SuperstructureScoringState getScoringState(NodeHeight height) {
@@ -200,7 +215,13 @@ public class SuperstructureManager extends LifecycleSubsystem {
                 () -> {
                   scoringHeight = null;
                   scoringProgress = ScoringProgress.DONE_SCORING;
-                }));
+                }))
+        .andThen(
+            Commands.runOnce(
+                    () -> {
+                      setGoal(States.STOWED);
+                    })
+                .unless(() -> height != NodeHeight.LOW));
   }
 
   // public Command yeetConeCommand() {
