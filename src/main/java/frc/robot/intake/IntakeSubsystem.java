@@ -70,24 +70,23 @@ public class IntakeSubsystem extends LifecycleSubsystem {
     }
 
     // Game piece detection
-    double motorVelocity = velocityFilter.calculate(encoder.getVelocity());
-    double intakeVoltage = voltageFilter.calculate(motor.getAppliedOutput()) * 12.0;
+    double motorVelocity = Math.abs(velocityFilter.calculate(encoder.getVelocity()));
+    double intakeVoltage = Math.abs(voltageFilter.calculate(motor.getAppliedOutput()) * 12.0);
     double theoreticalSpeed = intakeVoltage * (5700.0 / 12.0); // Neo Max is 5700
     double threshold = theoreticalSpeed * 0.5;
     Logger.getInstance().recordOutput("Intake/MotorVelocity", motorVelocity);
     Logger.getInstance().recordOutput("Intake/IntakeVoltage", intakeVoltage);
     Logger.getInstance().recordOutput("Intake/TheoreticalSpeed", theoreticalSpeed);
     Logger.getInstance().recordOutput("Intake/Threshold", threshold);
-    if (intakeTimer.hasElapsed(0.25)) {
+    if (intakeTimer.hasElapsed(0.75)) {
       if (motorVelocity < threshold && goalState == IntakeState.INTAKE_CONE) {
         gamePiece = HeldGamePiece.CONE;
       } else if (motorVelocity < threshold && goalState == IntakeState.INTAKE_CUBE) {
         gamePiece = HeldGamePiece.CUBE;
       }
-      // } else if (motorVelocity > threshold
-      //     && (goalState == IntakeState.OUTTAKE_CONE || goalState == IntakeState.OUTTAKE_CUBE)) {
-      //   gamePiece = HeldGamePiece.NOTHING;
-      // }
+    } else if (motorVelocity > threshold
+        && (goalState == IntakeState.OUTTAKE_CONE || goalState == IntakeState.OUTTAKE_CUBE)) {
+      gamePiece = HeldGamePiece.NOTHING;
     }
   }
 
