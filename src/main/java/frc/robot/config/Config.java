@@ -37,11 +37,12 @@ public class Config {
       new Translation2d(-0.263525, -0.263525);
 
   public static final double WHEEL_DIAMETER = Units.inchesToMeters(3.84);
-  public static final double SWERVE_STEER_GEARING_REDUCTION = 150.0 / 7.0;
+  public static final double SWERVE_STEER_GEARING_REDUCTION = 7.0 / 150.0;
+
   public static final double SWERVE_DRIVE_GEARING_REDUCTION =
       50.0 * 16.0 * 45.0 / 14.0 / 28.0 / 15.0;
   public static final double SWERVE_STEER_KV = 0.0;
-  public static final double SWERVE_STEER_KP = 0.0;
+  public static final double SWERVE_STEER_KP = 0.1;
   public static final double SWERVE_STEER_KI = 0.0;
   public static final double SWERVE_STEER_KD = 0.0;
   public static final double SWERVE_STEER_KS = 0.0;
@@ -64,37 +65,33 @@ public class Config {
   public static final PIDConstants SWERVE_ROTATION_SNAP_PID = new PIDConstants(7.5, 0, 0.5);
   public static final boolean SWERVE_USE_FOC = true;
 
-  public static final int SWERVE_FL_DRIVE_MOTOR_ID = 8;
-  public static final int SWERVE_FL_STEER_MOTOR_ID = 9;
-  public static final int SWERVE_FL_CANCODER_ID = 13;
+  public static final int SWERVE_FL_DRIVE_MOTOR_ID = 2;
+  public static final int SWERVE_FL_STEER_MOTOR_ID = 3;
+  public static final int SWERVE_FL_CANCODER_ID = 10;
   public static final SwerveModuleConstants SWERVE_FL_CONSTANTS =
       new SwerveModuleConstants(
-          Rotation2d.fromDegrees(182.021484375), SwerveCorner.FRONT_LEFT, true, true);
+          Rotation2d.fromDegrees(-176.66).unaryMinus(), SwerveCorner.FRONT_LEFT, true, true);
 
-  // -62.84
-  public static final int SWERVE_FR_DRIVE_MOTOR_ID = 6;
-  public static final int SWERVE_FR_STEER_MOTOR_ID = 7;
-  public static final int SWERVE_FR_CANCODER_ID = 12;
+  public static final int SWERVE_FR_DRIVE_MOTOR_ID = 4;
+  public static final int SWERVE_FR_STEER_MOTOR_ID = 5;
+  public static final int SWERVE_FR_CANCODER_ID = 11;
   public static final SwerveModuleConstants SWERVE_FR_CONSTANTS =
       new SwerveModuleConstants(
-          Rotation2d.fromDegrees(159.521484375), SwerveCorner.FRONT_RIGHT, true, true);
+          Rotation2d.fromDegrees(-45.70).unaryMinus(), SwerveCorner.FRONT_RIGHT, true, true);
 
-  // -147.8
-  public static final int SWERVE_BL_DRIVE_MOTOR_ID = 4;
-  public static final int SWERVE_BL_STEER_MOTOR_ID = 5;
-  public static final int SWERVE_BL_CANCODER_ID = 11;
+  public static final int SWERVE_BL_DRIVE_MOTOR_ID = 6;
+  public static final int SWERVE_BL_STEER_MOTOR_ID = 7;
+  public static final int SWERVE_BL_CANCODER_ID = 12;
   public static final SwerveModuleConstants SWERVE_BL_CONSTANTS =
       new SwerveModuleConstants(
-          Rotation2d.fromDegrees(2.548828125), SwerveCorner.BACK_LEFT, true, true);
-  // 78.75
-  public static final int SWERVE_BR_DRIVE_MOTOR_ID = 2;
-  public static final int SWERVE_BR_STEER_MOTOR_ID = 3;
-  public static final int SWERVE_BR_CANCODER_ID = 10;
+          Rotation2d.fromDegrees(-64.68).unaryMinus(), SwerveCorner.BACK_LEFT, true, true);
+
+  public static final int SWERVE_BR_DRIVE_MOTOR_ID = 8;
+  public static final int SWERVE_BR_STEER_MOTOR_ID = 9;
+  public static final int SWERVE_BR_CANCODER_ID = 13;
   public static final SwerveModuleConstants SWERVE_BR_CONSTANTS =
       new SwerveModuleConstants(
-          Rotation2d.fromDegrees(110.390625), SwerveCorner.BACK_RIGHT, true, true);
-
-  // 104.58
+          Rotation2d.fromDegrees(32.08).unaryMinus(), SwerveCorner.BACK_RIGHT, true, true);
 
   private Config() {}
 }
