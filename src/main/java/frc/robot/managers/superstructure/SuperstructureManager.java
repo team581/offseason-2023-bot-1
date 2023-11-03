@@ -83,9 +83,10 @@ public class SuperstructureManager extends LifecycleSubsystem {
 
   public Command setIntakeOverrideCommand(IntakeState intakeState) {
     return runOnce(
-        () -> {
-          setIntakeOverride(intakeState);
-        }).withName("IntakeOverrideCommand");
+            () -> {
+              setIntakeOverride(intakeState);
+            })
+        .withName("IntakeOverrideCommand");
   }
 
   public Command setStateCommand(SuperstructureState newGoalState) {
@@ -94,7 +95,8 @@ public class SuperstructureManager extends LifecycleSubsystem {
 
   public Command setStateCommand(Supplier<SuperstructureState> newGoalState) {
     return Commands.runOnce(() -> setGoal(newGoalState.get()))
-        .andThen(Commands.waitUntil(() -> atGoal(newGoalState.get()))).withName("SetStateCommand");
+        .andThen(Commands.waitUntil(() -> atGoal(newGoalState.get())))
+        .withName("SetStateCommand");
   }
 
   public void setMode(HeldGamePiece mode) {
@@ -103,9 +105,10 @@ public class SuperstructureManager extends LifecycleSubsystem {
 
   public Command setModeCommand(HeldGamePiece mode) {
     return runOnce(
-        () -> {
-          setMode(mode);
-        }).withName("SetModeCommand");
+            () -> {
+              setMode(mode);
+            })
+        .withName("SetModeCommand");
   }
 
   public HeldGamePiece getMode() {
@@ -129,7 +132,8 @@ public class SuperstructureManager extends LifecycleSubsystem {
             Commands.runOnce(
                 () -> {
                   setGoal(States.STOWED);
-                })).withName("IntakeFloorCommand");
+                }))
+        .withName("IntakeFloorCommand");
   }
 
   public Command getIntakeShelfCommand() {
@@ -145,7 +149,8 @@ public class SuperstructureManager extends LifecycleSubsystem {
             Commands.runOnce(
                 () -> {
                   setGoal(States.STOWED);
-                })).withName("IntakeShelfCommand");
+                }))
+        .withName("IntakeShelfCommand");
   }
 
   public Command getIntakeSingleSubstationCommand() {
@@ -154,7 +159,8 @@ public class SuperstructureManager extends LifecycleSubsystem {
             Commands.runOnce(
                 () -> {
                   setGoal(States.STOWED);
-                })).withName("IntakeSingleSubstationCommand");
+                }))
+        .withName("IntakeSingleSubstationCommand");
   }
 
   private SuperstructureScoringState getScoringState(NodeHeight height) {
@@ -195,11 +201,13 @@ public class SuperstructureManager extends LifecycleSubsystem {
               scoringHeight = height;
               scoringProgress = ScoringProgress.ALIGNING;
             })
-        .andThen(setStateCommand(getScoringState(height).aligning)).withName("ScoreAlignCommand");
+        .andThen(setStateCommand(getScoringState(height).aligning))
+        .withName("ScoreAlignCommand");
   }
 
   public Command getScoreFinishCommand() {
-    return getScoreFinishCommand(scoringHeight == null ? NodeHeight.LOW : scoringHeight).withName("ScoreFinishCommand");
+    return getScoreFinishCommand(scoringHeight == null ? NodeHeight.LOW : scoringHeight)
+        .withName("ScoreFinishCommand");
   }
 
   public Command getScoreFinishCommand(NodeHeight height) {
@@ -221,7 +229,8 @@ public class SuperstructureManager extends LifecycleSubsystem {
                     () -> {
                       setGoal(States.STOWED);
                     })
-                .unless(() -> height != NodeHeight.LOW)).withName("ScoreFinishCommand");
+                .unless(() -> height != NodeHeight.LOW))
+        .withName("ScoreFinishCommand");
   }
 
   // public Command yeetConeCommand() {
