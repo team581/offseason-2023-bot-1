@@ -75,6 +75,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
         .recordOutput("Superstructure/GoalState/GoalIntakeState", goalState.intakeState.toString());
     Logger.getInstance()
         .recordOutput("Superstructure/GoalState/GoalIntakeNow", goalState.intakeNow);
+    Logger.getInstance().recordOutput("Superstructure/Mode", mode.toString());
   }
 
   public void setIntakeOverride(IntakeState intakeState) {
@@ -94,7 +95,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
   }
 
   public Command setStateCommand(Supplier<SuperstructureState> newGoalState) {
-    return Commands.runOnce(() -> setGoal(newGoalState.get()))
+    return Commands.runOnce(() -> setGoal(newGoalState.get()), wrist, shoulder)
         .andThen(Commands.waitUntil(() -> atGoal(newGoalState.get())))
         .withName("SetStateCommand");
   }
@@ -128,11 +129,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
                 return States.INTAKING_CUBE_FLOOR;
               }
             })
-        .andThen(
-            Commands.runOnce(
-                () -> {
-                  setGoal(States.STOWED);
-                }))
+        .andThen(stowFast())
         .withName("IntakeFloorCommand");
   }
 
@@ -145,21 +142,22 @@ public class SuperstructureManager extends LifecycleSubsystem {
                 return States.INTAKING_CUBE_SHELF;
               }
             })
-        .andThen(
-            Commands.runOnce(
-                () -> {
-                  setGoal(States.STOWED);
-                }))
+        .andThen(stowFast())
         .withName("IntakeShelfCommand");
+  }
+
+  private Command stowFast() {
+    return Commands.runOnce(
+        () -> {
+          setGoal(States.STOWED);
+        },
+        wrist,
+        shoulder);
   }
 
   public Command getIntakeSingleSubstationCommand() {
     return setStateCommand(States.INTAKING_CONE_SINGLE_SUBSTATION)
-        .andThen(
-            Commands.runOnce(
-                () -> {
-                  setGoal(States.STOWED);
-                }))
+        .andThen(stowFast())
         .withName("IntakeSingleSubstationCommand");
   }
 
@@ -224,18 +222,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
                   scoringHeight = null;
                   scoringProgress = ScoringProgress.DONE_SCORING;
                 }))
-        .andThen(
-            Commands.runOnce(
-                    () -> {
-                      setGoal(States.STOWED);
-                    })
-                .unless(() -> height != NodeHeight.LOW))
+        .andThen(stowFast().unless(() -> height != NodeHeight.LOW))
         .withName("ScoreFinishCommand");
   }
-
-  // public Command yeetConeCommand() {
-  //   return Commands.runOnce(() -> (setStateCommand(States.YEET_CONE)))
-  //       .waitUntil(atGoal(States.YEET_CONE))
-  //       .andThen(setStateCommand(States.STOWED));
-  // }
 }
