@@ -85,7 +85,8 @@ public class SuperstructureManager extends LifecycleSubsystem {
     if (manualIntakeState == null) {
       Logger.getInstance().recordOutput("Superstructure/ManualIntakeState", "(null)");
     } else {
-      Logger.getInstance().recordOutput("Superstructure/ManualIntakeState", manualIntakeState.toString());
+      Logger.getInstance()
+          .recordOutput("Superstructure/ManualIntakeState", manualIntakeState.toString());
     }
   }
 
@@ -209,8 +210,6 @@ public class SuperstructureManager extends LifecycleSubsystem {
             () -> {
               scoringHeight = height.get();
               scoringProgress = ScoringProgress.ALIGNING;
-              System.out.println("scoring height in score align command: " + scoringHeight.toString());
-              System.out.println("height.get() in score align command: " + height.get().toString());
             })
         .andThen(setStateCommand(() -> getScoringState(height.get()).aligning))
         .withName("ScoreAlignCommand");
@@ -226,16 +225,13 @@ public class SuperstructureManager extends LifecycleSubsystem {
             () -> {
               scoringHeight = height.get();
               scoringProgress = ScoringProgress.PLACING;
-              System.out.println("scoring height in score finish command: " + scoringHeight.toString());
-              System.out.println("height.get() in score finish command: " + height.get().toString());
             })
-        .andThen(setStateCommand(getScoringState(height.get()).aligning))
-        .andThen(setStateCommand(getScoringState(height.get()).scoring))
+        .andThen(setStateCommand(() -> getScoringState(height.get()).aligning))
+        .andThen(setStateCommand(() -> getScoringState(height.get()).scoring))
         .andThen(
             Commands.runOnce(
                 () -> {
-                  System.out.println("scoring height in score finish command: " + scoringHeight.toString());
-                  System.out.println("height.get() in score finish command: " + height.get().toString());                  scoringHeight = null;
+                  scoringHeight = null;
                   scoringProgress = ScoringProgress.DONE_SCORING;
                 }))
         .andThen(stowFast().unless(() -> height.get() != NodeHeight.LOW))

@@ -34,7 +34,6 @@ import frc.robot.managers.superstructure.NodeHeight;
 import frc.robot.managers.superstructure.States;
 import frc.robot.managers.superstructure.SuperstructureManager;
 import frc.robot.managers.superstructure.SuperstructureMotionManager;
-import frc.robot.managers.superstructure.SuperstructureState;
 import frc.robot.shoulder.ShoulderSubsystem;
 import frc.robot.swerve.SwerveModule;
 import frc.robot.swerve.SwerveSubsystem;
@@ -108,7 +107,8 @@ public class Robot extends LoggedRobot {
 
   private final LocalizationSubsystem localization = new LocalizationSubsystem(swerve, imu);
 
-  private final LightsSubsystem lights = new LightsSubsystem(new CANdle(Config.CANDLE_ID), intake, superstructure);
+  private final LightsSubsystem lights =
+      new LightsSubsystem(new CANdle(Config.CANDLE_ID), intake, superstructure);
 
   private final Autos autos = new Autos(localization, swerve, intake, wrist);
 
@@ -199,7 +199,10 @@ public class Robot extends LoggedRobot {
     operatorController.y().onTrue(superstructure.getScoreAlignCommand(() -> NodeHeight.HIGH));
     operatorController.b().onTrue(superstructure.getScoreAlignCommand(() -> NodeHeight.MID));
     // A or X for stow
-    operatorController.a().or(operatorController.x()).onTrue(superstructure.setStateCommand(States.STOWED));
+    operatorController
+        .a()
+        .or(operatorController.x())
+        .onTrue(superstructure.setStateCommand(States.STOWED));
 
     // Manual intake override
     operatorController

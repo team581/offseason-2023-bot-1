@@ -78,67 +78,65 @@ public class Autos {
 
     eventMap = wrapAutoEventMap(eventMap);
 
-      autoBuilder =
-          new SwerveAutoBuilder(
-              localization::getPose,
-              localization::resetPose,
-              SwerveSubsystem.KINEMATICS,
-              Config.SWERVE_TRANSLATION_PID,
-              Config.SWERVE_ROTATION_PID,
-              (states) -> swerve.setModuleStates(states, false, false),
-              eventMap,
-              false,
-              swerve);
+    autoBuilder =
+        new SwerveAutoBuilder(
+            localization::getPose,
+            localization::resetPose,
+            SwerveSubsystem.KINEMATICS,
+            Config.SWERVE_TRANSLATION_PID,
+            Config.SWERVE_ROTATION_PID,
+            (states) -> swerve.setModuleStates(states, false, false),
+            eventMap,
+            false,
+            swerve);
 
-      CommandScheduler.getInstance()
-          .onCommandInitialize(
-              command -> System.out.println("[COMMANDS] Starting command " + command.getName()));
-      CommandScheduler.getInstance()
-          .onCommandInterrupt(
-              command -> System.out.println("[COMMANDS] Cancelled command " + command.getName()));
-      CommandScheduler.getInstance()
-          .onCommandFinish(
-              command -> System.out.println("[COMMANDS] Finished command " + command.getName()));
+    CommandScheduler.getInstance()
+        .onCommandInitialize(
+            command -> System.out.println("[COMMANDS] Starting command " + command.getName()));
+    CommandScheduler.getInstance()
+        .onCommandInterrupt(
+            command -> System.out.println("[COMMANDS] Cancelled command " + command.getName()));
+    CommandScheduler.getInstance()
+        .onCommandFinish(
+            command -> System.out.println("[COMMANDS] Finished command " + command.getName()));
 
+    for (AutoKindWithoutTeam autoKind : EnumSet.allOf(AutoKindWithoutTeam.class)) {
+      autoChooser.addOption(autoKind.toString(), autoKind);
+    }
 
-              for (AutoKindWithoutTeam autoKind : EnumSet.allOf(AutoKindWithoutTeam.class)) {
-                autoChooser.addOption(autoKind.toString(), autoKind);
-              }
+    if (Config.IS_DEVELOPMENT) {
+      PathPlannerServer.startServer(5811);
+    }
 
-      if (Config.IS_DEVELOPMENT) {
-        PathPlannerServer.startServer(5811);
-      }
+    Logger.getInstance().recordOutput("Autos/CurrentTrajectory", new Trajectory());
+    Logger.getInstance().recordOutput("Autos/TargetPose", new Pose2d());
+    Logger.getInstance().recordOutput("Autos/SetpointSpeeds/X", 0);
+    Logger.getInstance().recordOutput("Autos/SetpointSpeeds/Y", 0);
+    Logger.getInstance().recordOutput("Autos/SetpointSpeeds/Omega", 0);
+    Logger.getInstance().recordOutput("Autos/TranslationError", new Pose2d());
+    Logger.getInstance().recordOutput("Autos/RotationError", 0);
 
-      Logger.getInstance().recordOutput("Autos/CurrentTrajectory", new Trajectory());
-      Logger.getInstance().recordOutput("Autos/TargetPose", new Pose2d());
-      Logger.getInstance().recordOutput("Autos/SetpointSpeeds/X", 0);
-      Logger.getInstance().recordOutput("Autos/SetpointSpeeds/Y", 0);
-      Logger.getInstance().recordOutput("Autos/SetpointSpeeds/Omega", 0);
-      Logger.getInstance().recordOutput("Autos/TranslationError", new Pose2d());
-      Logger.getInstance().recordOutput("Autos/RotationError", 0);
-
-      PPSwerveControllerCommand.setLoggingCallbacks(
-          (PathPlannerTrajectory activeTrajectory) -> {
-            Logger.getInstance().recordOutput("Autos/CurrentTrajectory", activeTrajectory);
-          },
-          (Pose2d targetPose) -> {
-            Logger.getInstance().recordOutput("Autos/TargetPose", targetPose);
-          },
-          (ChassisSpeeds setpointSpeeds) -> {
-            Logger.getInstance()
-                .recordOutput("Autos/SetpointSpeeds/X", setpointSpeeds.vxMetersPerSecond);
-            Logger.getInstance()
-                .recordOutput("Autos/SetpointSpeeds/Y", setpointSpeeds.vyMetersPerSecond);
-            Logger.getInstance()
-                .recordOutput("Autos/SetpointSpeeds/Omega", setpointSpeeds.omegaRadiansPerSecond);
-          },
-          (Translation2d translationError, Rotation2d rotationError) -> {
-            Logger.getInstance()
-                .recordOutput(
-                    "Autos/TranslationError", new Pose2d(translationError, new Rotation2d()));
-            Logger.getInstance().recordOutput("Autos/RotationError", rotationError.getDegrees());
-          });
-
+    PPSwerveControllerCommand.setLoggingCallbacks(
+        (PathPlannerTrajectory activeTrajectory) -> {
+          Logger.getInstance().recordOutput("Autos/CurrentTrajectory", activeTrajectory);
+        },
+        (Pose2d targetPose) -> {
+          Logger.getInstance().recordOutput("Autos/TargetPose", targetPose);
+        },
+        (ChassisSpeeds setpointSpeeds) -> {
+          Logger.getInstance()
+              .recordOutput("Autos/SetpointSpeeds/X", setpointSpeeds.vxMetersPerSecond);
+          Logger.getInstance()
+              .recordOutput("Autos/SetpointSpeeds/Y", setpointSpeeds.vyMetersPerSecond);
+          Logger.getInstance()
+              .recordOutput("Autos/SetpointSpeeds/Omega", setpointSpeeds.omegaRadiansPerSecond);
+        },
+        (Translation2d translationError, Rotation2d rotationError) -> {
+          Logger.getInstance()
+              .recordOutput(
+                  "Autos/TranslationError", new Pose2d(translationError, new Rotation2d()));
+          Logger.getInstance().recordOutput("Autos/RotationError", rotationError.getDegrees());
+        });
   }
 
   public Command getAutoCommand() {
