@@ -11,7 +11,7 @@ public class Positions {
       new SuperstructurePosition(Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0));
 
   public static final SuperstructurePosition INTAKING_CUBE_FLOOR =
-      new SuperstructurePosition(Rotation2d.fromDegrees(25.7), Rotation2d.fromDegrees(137.9));
+      new SuperstructurePosition(Rotation2d.fromDegrees(-25), Rotation2d.fromDegrees(-120));
   public static final SuperstructurePosition INTAKING_CUBE_SHELF =
       new SuperstructurePosition(Rotation2d.fromDegrees(90), Rotation2d.fromDegrees(180));
 
@@ -25,7 +25,7 @@ public class Positions {
       new SuperstructurePosition(Rotation2d.fromDegrees(100), Rotation2d.fromDegrees(190));
 
   public static final SuperstructurePosition INTAKING_CONE_FLOOR =
-      new SuperstructurePosition(Rotation2d.fromDegrees(-35), Rotation2d.fromDegrees(-152));
+      new SuperstructurePosition(Rotation2d.fromDegrees(-33), Rotation2d.fromDegrees(-152));
   public static final SuperstructurePosition INTAKING_CONE_SHELF =
       new SuperstructurePosition(Rotation2d.fromDegrees(90), Rotation2d.fromDegrees(180));
   public static final SuperstructurePosition INTAKING_CONE_SINGLE_SUBSTATION =
