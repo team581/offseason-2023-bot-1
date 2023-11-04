@@ -17,6 +17,7 @@ import frc.robot.managers.superstructure.ScoringProgress;
 import frc.robot.managers.superstructure.SuperstructureManager;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
+import org.littletonrobotics.junction.Logger;
 
 public class LightsSubsystem extends LifecycleSubsystem {
 
@@ -29,7 +30,6 @@ public class LightsSubsystem extends LifecycleSubsystem {
 
   private final Timer blinkTimer = new Timer();
   private Color color = Color.kWhite;
-  // TODO: Copy paste blink pattern enum from other repo
   private BlinkPattern blinkPattern = BlinkPattern.SOLID;
 
   public LightsSubsystem(
@@ -111,5 +111,11 @@ public class LightsSubsystem extends LifecycleSubsystem {
         candle.setLEDs(color8Bit.red, color8Bit.green, color8Bit.blue);
       }
     }
+  }
+
+  @Override
+  public void robotPeriodic() {
+    Logger.getInstance().recordOutput("Lights/BlinkPattern", blinkPattern.toString());
+    Logger.getInstance().recordOutput("Lights/Color", color.toString());
   }
 }

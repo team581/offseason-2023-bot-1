@@ -76,6 +76,17 @@ public class SuperstructureManager extends LifecycleSubsystem {
     Logger.getInstance()
         .recordOutput("Superstructure/GoalState/GoalIntakeNow", goalState.intakeNow);
     Logger.getInstance().recordOutput("Superstructure/Mode", mode.toString());
+    Logger.getInstance().recordOutput("Superstructure/ScoringProgress", scoringProgress.toString());
+    if (scoringHeight == null) {
+      Logger.getInstance().recordOutput("Superstructure/ScoringHeight", "(null)");
+    } else {
+      Logger.getInstance().recordOutput("Superstructure/ScoringHeight", scoringHeight.toString());
+    }
+    if (manualIntakeState == null) {
+      Logger.getInstance().recordOutput("Superstructure/ManualIntakeState", "(null)");
+    } else {
+      Logger.getInstance().recordOutput("Superstructure/ManualIntakeState", manualIntakeState.toString());
+    }
   }
 
   public void setIntakeOverride(IntakeState intakeState) {
@@ -193,36 +204,41 @@ public class SuperstructureManager extends LifecycleSubsystem {
     }
   }
 
-  public Command getScoreAlignCommand(NodeHeight height) {
+  public Command getScoreAlignCommand(Supplier<NodeHeight> height) {
     return Commands.runOnce(
             () -> {
-              scoringHeight = height;
+              scoringHeight = height.get();
               scoringProgress = ScoringProgress.ALIGNING;
+              System.out.println("scoring height in score align command: " + scoringHeight.toString());
+              System.out.println("height.get() in score align command: " + height.get().toString());
             })
-        .andThen(setStateCommand(getScoringState(height).aligning))
+        .andThen(setStateCommand(() -> getScoringState(height.get()).aligning))
         .withName("ScoreAlignCommand");
   }
 
   public Command getScoreFinishCommand() {
-    return getScoreFinishCommand(scoringHeight == null ? NodeHeight.LOW : scoringHeight)
+    return getScoreFinishCommand(() -> scoringHeight == null ? NodeHeight.LOW : scoringHeight)
         .withName("ScoreFinishCommand");
   }
 
-  public Command getScoreFinishCommand(NodeHeight height) {
+  public Command getScoreFinishCommand(Supplier<NodeHeight> height) {
     return Commands.runOnce(
             () -> {
-              scoringHeight = height;
+              scoringHeight = height.get();
               scoringProgress = ScoringProgress.PLACING;
+              System.out.println("scoring height in score finish command: " + scoringHeight.toString());
+              System.out.println("height.get() in score finish command: " + height.get().toString());
             })
-        .andThen(setStateCommand(getScoringState(height).aligning))
-        .andThen(setStateCommand(getScoringState(height).scoring))
+        .andThen(setStateCommand(getScoringState(height.get()).aligning))
+        .andThen(setStateCommand(getScoringState(height.get()).scoring))
         .andThen(
             Commands.runOnce(
                 () -> {
-                  scoringHeight = null;
+                  System.out.println("scoring height in score finish command: " + scoringHeight.toString());
+                  System.out.println("height.get() in score finish command: " + height.get().toString());                  scoringHeight = null;
                   scoringProgress = ScoringProgress.DONE_SCORING;
                 }))
-        .andThen(stowFast().unless(() -> height != NodeHeight.LOW))
+        .andThen(stowFast().unless(() -> height.get() != NodeHeight.LOW))
         .withName("ScoreFinishCommand");
   }
 }

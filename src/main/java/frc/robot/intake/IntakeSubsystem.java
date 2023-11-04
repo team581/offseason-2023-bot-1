@@ -53,12 +53,16 @@ public class IntakeSubsystem extends LifecycleSubsystem {
 
   @Override
   public void enabledPeriodic() {
-    if (goalState == IntakeState.OUTTAKE_CONE) {
+    if (goalState == IntakeState.MANUAL_INTAKE) {
+      motor.set(-0.6);
+    } else if (goalState == IntakeState.MANUAL_OUTTAKE) {
+      motor.set(0.6);
+    } else if (goalState == IntakeState.OUTTAKE_CONE) {
       motor.set(0.4);
     } else if (goalState == IntakeState.OUTTAKE_CUBE) {
       motor.set(0.3);
     } else if (gamePiece == HeldGamePiece.CUBE) {
-      motor.set(-0.6);
+      motor.set(-0.75);
     } else if (gamePiece == HeldGamePiece.CONE) {
       motor.set(-0.6);
     } else if (goalState == IntakeState.INTAKE_CUBE) {
