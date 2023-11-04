@@ -112,8 +112,12 @@ public class SuperstructureManager extends LifecycleSubsystem {
         .withName("SetStateCommand");
   }
 
-  public void setMode(HeldGamePiece mode) {
-    this.mode = mode;
+  public void setMode(HeldGamePiece newMode) {
+    if (this.mode != newMode) {
+      intake.setGamePiece(HeldGamePiece.NOTHING);
+    }
+
+    this.mode = newMode;
   }
 
   public Command setModeCommand(HeldGamePiece mode) {
