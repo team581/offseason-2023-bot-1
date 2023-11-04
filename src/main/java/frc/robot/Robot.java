@@ -110,7 +110,7 @@ public class Robot extends LoggedRobot {
   private final LightsSubsystem lights =
       new LightsSubsystem(new CANdle(Config.CANDLE_ID), intake, superstructure);
 
-  private final Autos autos = new Autos(localization, swerve, intake, wrist);
+  private final Autos autos = new Autos(localization, swerve, intake, wrist, autobalance);
 
   private Command autoCommand;
 

@@ -20,12 +20,14 @@ import frc.robot.config.Config;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.intake.IntakeSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
+import frc.robot.managers.autobalance.Autobalance;
 import frc.robot.swerve.SwerveSubsystem;
 import frc.robot.wrist.WristSubsystem;
 import java.lang.ref.WeakReference;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -63,17 +65,21 @@ public class Autos {
   private final SwerveSubsystem swerve;
   private final IntakeSubsystem intake;
   private final WristSubsystem wrist;
+  private final Autobalance autobalance;
 
   public Autos(
       LocalizationSubsystem localization,
       SwerveSubsystem swerve,
       IntakeSubsystem intake,
-      WristSubsystem wrist) {
+      WristSubsystem wrist,
+      Autobalance autobalance) {
 
     this.localization = localization;
     this.swerve = swerve;
     this.intake = intake;
     this.wrist = wrist;
+    this.autobalance = autobalance;
+
     Map<String, Command> eventMap = Map.ofEntries();
 
     eventMap = wrapAutoEventMap(eventMap);
@@ -139,6 +145,38 @@ public class Autos {
         });
   }
 
+  private Command buildAutoCommand(AutoKind auto) {
+    WeakReference<Command> ref = autosCache.get(auto);
+    if (ref != null && ref.get() != null) {
+      Command autoCommand = ref.get();
+
+      if (autoCommand != null) {
+        return autoCommand;
+      }
+    }
+
+    String autoName = "Auto" + auto.toString();
+    Command autoCommand = Commands.runOnce(() -> swerve.driveTeleop(0, 0, 0, true, true), swerve);
+
+    if (auto == AutoKind.DO_NOTHING) {
+      return autoCommand.andThen(localization.getZeroAwayCommand()).withName(autoName);
+    }
+
+    List<PathPlannerTrajectory> pathGroup = Paths.getInstance().getPath(auto);
+
+    autoCommand = autoCommand.andThen(autoBuilder.fullAuto(pathGroup));
+
+    if (auto.autoBalance) {
+      autoCommand = autoCommand.andThen(this.autobalance.getCommand());
+    }
+
+    autoCommand = autoCommand.withName(autoName);
+
+    autosCache.put(auto, new WeakReference<>(autoCommand));
+
+    return autoCommand;
+  }
+
   public Command getAutoCommand() {
     AutoKindWithoutTeam rawAuto = autoChooser.get();
 
@@ -152,11 +190,7 @@ public class Autos {
       return Commands.none();
     }
 
-    // right now, this function just returns null
-    // instead, it needs to actually return the command to run during auto
-    // i recommend you create a field in this class for a pathplanner swerve auto builder
-    // then, you can take that and do auto builder.fullAuto(path);
-    return null;
+    return buildAutoCommand(auto);
   }
 
   public void clearCache() {
