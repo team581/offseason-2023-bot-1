@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -25,6 +26,7 @@ import frc.robot.imu.ImuSubsystem;
 import frc.robot.intake.HeldGamePiece;
 import frc.robot.intake.IntakeState;
 import frc.robot.intake.IntakeSubsystem;
+import frc.robot.lights.LightsSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.managers.autobalance.Autobalance;
 import frc.robot.managers.autorotate.AutoRotate;
@@ -104,6 +106,9 @@ public class Robot extends LoggedRobot {
   private final AutoRotate autoRotate = new AutoRotate(swerve);
 
   private final LocalizationSubsystem localization = new LocalizationSubsystem(swerve, imu);
+
+  private final LightsSubsystem lights =
+      new LightsSubsystem(new CANdle(Config.CANDLE_ID), intake, superstructure);
 
   private final Autos autos = new Autos(localization, swerve, intake, wrist, autobalance);
 
@@ -191,9 +196,13 @@ public class Robot extends LoggedRobot {
         .onFalse(swerve.disableXSwerveCommand());
 
     // Operator controls
-    operatorController.y().onTrue(superstructure.getScoreAlignCommand(NodeHeight.HIGH));
-    operatorController.b().onTrue(superstructure.getScoreAlignCommand(NodeHeight.MID));
-    operatorController.a().onTrue(superstructure.setStateCommand(States.STOWED));
+    operatorController.y().onTrue(superstructure.getScoreAlignCommand(() -> NodeHeight.HIGH));
+    operatorController.b().onTrue(superstructure.getScoreAlignCommand(() -> NodeHeight.MID));
+    // A or X for stow
+    operatorController
+        .a()
+        .or(operatorController.x())
+        .onTrue(superstructure.setStateCommand(States.STOWED));
 
     // Manual intake override
     operatorController
