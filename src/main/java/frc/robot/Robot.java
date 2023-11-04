@@ -25,6 +25,7 @@ import frc.robot.imu.ImuSubsystem;
 import frc.robot.intake.HeldGamePiece;
 import frc.robot.intake.IntakeState;
 import frc.robot.intake.IntakeSubsystem;
+import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.managers.autobalance.Autobalance;
 import frc.robot.managers.autorotate.AutoRotate;
 import frc.robot.managers.superstructure.NodeHeight;
@@ -83,8 +84,6 @@ public class Robot extends LoggedRobot {
 
   private final FmsSubsystem fmsSubsystem = new FmsSubsystem();
 
-  private final Autos autos = new Autos();
-
   private final ShoulderSubsystem shoulder =
       new ShoulderSubsystem(
           new CANSparkMax(Config.SHOULDER_ID, MotorType.kBrushless),
@@ -103,6 +102,10 @@ public class Robot extends LoggedRobot {
 
   private final Autobalance autobalance = new Autobalance(swerve, imu);
   private final AutoRotate autoRotate = new AutoRotate(swerve);
+
+  private final LocalizationSubsystem localization = new LocalizationSubsystem(swerve, imu);
+
+  private final Autos autos = new Autos(localization, swerve, intake, wrist);
 
   private Command autoCommand;
 
