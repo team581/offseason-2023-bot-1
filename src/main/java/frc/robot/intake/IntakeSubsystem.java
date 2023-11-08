@@ -26,6 +26,7 @@ public class IntakeSubsystem extends LifecycleSubsystem {
     super(SubsystemPriority.INTAKE);
     this.motor = motor;
     encoder = motor.getEncoder();
+    encoder.setPositionConversionFactor(1.0);
     encoder.setVelocityConversionFactor(1.0);
   }
 
