@@ -10,14 +10,17 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.REVLibError;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -33,29 +36,41 @@ public class SwerveModule {
 
   private final SwerveModuleConstants constants;
   private final TalonFX driveMotor;
-  private final TalonFX steerMotor;
+  private final CANSparkMax steerMotor;
   private final DutyCycleOut driveVoltageOpenLoopRequest =
       new DutyCycleOut(0, Config.SWERVE_USE_FOC, true);
-  private final PositionVoltage steerMotorControl =
-      new PositionVoltage(0, Config.SWERVE_USE_FOC, 0, 0, false);
   private final VelocityVoltage driveVoltageClosedLoopRequest =
       new VelocityVoltage(0, Config.SWERVE_USE_FOC, 0, 0, false);
   private Rotation2d previousAngle = new Rotation2d();
 
   private StatusSignal<Double> driveMotorStatorCurrent;
 
+  private final CANcoder cancoder;
+
+  private final RelativeEncoder steerMotorEncoder;
+  private final SparkMaxPIDController steerMotorPID;
+
+  private boolean setAngle = false;
+
   public SwerveModule(
-      SwerveModuleConstants constants, TalonFX driveMotor, TalonFX steerMotor, CANcoder encoder) {
+      SwerveModuleConstants constants,
+      TalonFX driveMotor,
+      CANSparkMax steerMotor,
+      CANcoder cancoder) {
     this.constants = constants;
     this.driveMotor = driveMotor;
     this.steerMotor = steerMotor;
+    this.cancoder = cancoder;
+
+    steerMotorEncoder = steerMotor.getEncoder();
+    steerMotorPID = steerMotor.getPIDController();
 
     CANcoderConfiguration cancoderConfig = new CANcoderConfiguration();
 
     cancoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
     cancoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
     cancoderConfig.MagnetSensor.MagnetOffset = constants.angleOffset.getRotations();
-    encoder.getConfigurator().apply(cancoderConfig);
+    cancoder.getConfigurator().apply(cancoderConfig);
 
     TalonFXConfiguration driveMotorConfigs = new TalonFXConfiguration();
 
@@ -68,9 +83,9 @@ public class SwerveModule {
     driveMotorConfigs.Voltage.PeakForwardVoltage = 12;
     driveMotorConfigs.Voltage.PeakReverseVoltage = -12;
 
-    CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
-    currentLimits.SupplyCurrentLimit = 35;
-    currentLimits.SupplyCurrentLimitEnable = true;
+    driveMotorConfigs.CurrentLimits.SupplyCurrentLimit = 15;
+    driveMotorConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
+    driveMotorConfigs.CurrentLimits.StatorCurrentLimitEnable = false;
 
     if (constants.driveInversion) {
       driveMotorConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
@@ -87,42 +102,30 @@ public class SwerveModule {
       System.out.println("Could not apply configs, error code: " + driveStatus.toString());
     }
 
-    TalonFXConfiguration steerMotorConfigs = new TalonFXConfiguration();
-    steerMotorConfigs.ClosedLoopGeneral.ContinuousWrap = true;
-
-    steerMotorConfigs.Slot0.kV = Config.SWERVE_STEER_KV;
-    steerMotorConfigs.Slot0.kP = Config.SWERVE_STEER_KP;
-    steerMotorConfigs.Slot0.kI = Config.SWERVE_STEER_KI;
-    steerMotorConfigs.Slot0.kD = Config.SWERVE_STEER_KD;
-    steerMotorConfigs.Slot0.kS = Config.SWERVE_STEER_KS;
-
-    steerMotorConfigs.Feedback.FeedbackRemoteSensorID = encoder.getDeviceID();
-    steerMotorConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
-    steerMotorConfigs.Feedback.SensorToMechanismRatio = 1.0;
-    steerMotorConfigs.Feedback.RotorToSensorRatio = Config.SWERVE_STEER_GEARING_REDUCTION;
-
-    steerMotorConfigs.CurrentLimits.SupplyCurrentLimit = 35;
-    steerMotorConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
-    steerMotorConfigs.MotorOutput.DutyCycleNeutralDeadband = 0;
-
-    steerMotorConfigs.Feedback.SensorToMechanismRatio = Config.SWERVE_STEER_GEARING_REDUCTION;
-
-    if (constants.angleInversion) {
-      steerMotorConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    } else {
-      steerMotorConfigs.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    }
-
-    StatusCode steerStatus = StatusCode.StatusCodeNotInitialized;
-    for (int i = 0; i < 5; ++i) {
-      steerStatus = steerMotor.getConfigurator().apply(steerMotorConfigs);
-      if (steerStatus.isOK()) break;
-    }
-    if (!steerStatus.isOK()) {
-      System.out.println("Could not apply configs, error code: " + steerStatus.toString());
-    }
-
     driveMotorStatorCurrent = driveMotor.getStatorCurrent();
+
+    // TODO: super temporary, remove this after 10/31/2023
+    // steerMotor.restoreFactoryDefaults();
+
+    steerMotorPID.setP(Config.SWERVE_STEER_KP);
+    steerMotorPID.setI(Config.SWERVE_STEER_KI);
+    steerMotorPID.setD(Config.SWERVE_STEER_KD);
+    steerMotorPID.setFF(Config.SWERVE_STEER_KV);
+    steerMotorPID.setFeedbackDevice(steerMotorEncoder);
+    steerMotor.setIdleMode(IdleMode.kBrake);
+
+    steerMotorEncoder.setPositionConversionFactor(Config.SWERVE_STEER_GEARING_REDUCTION);
+    steerMotorEncoder.setVelocityConversionFactor(Config.SWERVE_STEER_GEARING_REDUCTION);
+
+    steerMotorPID.setPositionPIDWrappingEnabled(true);
+    steerMotorPID.setPositionPIDWrappingMinInput(0.0);
+    steerMotorPID.setPositionPIDWrappingMaxInput(1.0);
+
+    steerMotor.setSmartCurrentLimit(15);
+
+    steerMotor.setInverted(constants.angleInversion);
+
+    // steerMotor.burnFlash();
   }
 
   public void log() {
@@ -130,6 +133,22 @@ public class SwerveModule {
         .recordOutput(
             "Swerve/" + constants.corner.toString() + "/DriveMotorStatorCurrent",
             driveMotorStatorCurrent.refresh().getValue());
+    Logger.getInstance()
+        .recordOutput(
+            "Swerve/" + constants.corner.toString() + "/SteerMotorPosition",
+            getSteerMotorPosition().getDegrees());
+    Logger.getInstance()
+        .recordOutput(
+            "Swerve/" + constants.corner.toString() + "/CANCoderPositionWithOffset",
+            getCancoderAngle().getDegrees());
+    Logger.getInstance()
+        .recordOutput(
+            "Swerve/" + constants.corner.toString() + "/CANCoderPositionNoOffset",
+            getCancoderAngle().minus(constants.angleOffset).getDegrees());
+    Logger.getInstance()
+        .recordOutput(
+            "Swerve/" + constants.corner.toString() + "/EncoderConversionFactor",
+            steerMotorEncoder.getPositionConversionFactor());
   }
 
   public void setDesiredState(
@@ -137,7 +156,7 @@ public class SwerveModule {
     final var steerMotorPosition = getSteerMotorPosition();
     state = CtreModuleState.optimize(state, steerMotorPosition);
 
-    steerMotor.setControl(steerMotorControl.withPosition(state.angle.getRotations()));
+    steerMotorPID.setReference(state.angle.getRotations(), CANSparkMax.ControlType.kPosition);
 
     boolean isStopped = Math.abs(state.speedMetersPerSecond) <= SwerveSubsystem.MAX_VELOCITY * 0.01;
     Rotation2d angle = isStopped && !skipJitterOptimization ? this.previousAngle : state.angle;
@@ -169,8 +188,23 @@ public class SwerveModule {
     return new SwerveModulePosition(driveMotorPosition, steerMotorPosition);
   }
 
+  private Rotation2d getCancoderAngle() {
+    return Rotation2d.fromRotations(cancoder.getAbsolutePosition().getValue());
+  }
+
+  public void resetSteerMotorAngle() {
+    if (!setAngle) {
+      REVLibError error = steerMotorEncoder.setPosition(getCancoderAngle().getRotations());
+      Logger.getInstance()
+          .recordOutput("Swerve/" + constants.corner.toString() + "/SetError", error.toString());
+      if (error == REVLibError.kOk) {
+        setAngle = true;
+      }
+    }
+  }
+
   private Rotation2d getSteerMotorPosition() {
-    double rotations = steerMotor.getPosition().getValue();
+    double rotations = steerMotorEncoder.getPosition();
     return Rotation2d.fromRotations(rotations);
   }
 

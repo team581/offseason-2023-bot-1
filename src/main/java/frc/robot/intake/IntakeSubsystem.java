@@ -6,6 +6,7 @@ package frc.robot.intake;
 
 import com.revrobotics.*;
 import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
 import org.littletonrobotics.junction.Logger;
@@ -17,23 +18,28 @@ public class IntakeSubsystem extends LifecycleSubsystem {
   // 7 is a placeholder not tuned
   private final CANSparkMax motor;
   private final RelativeEncoder encoder;
-  private IntakeState goalState;
+  private IntakeState goalState = IntakeState.STOPPED;
   private HeldGamePiece gamePiece = HeldGamePiece.NOTHING;
+  private final Timer intakeTimer = new Timer();
 
   public IntakeSubsystem(CANSparkMax motor) {
     super(SubsystemPriority.INTAKE);
     this.motor = motor;
     encoder = motor.getEncoder();
+    encoder.setVelocityConversionFactor(1.0);
   }
 
-  public void setGoalState(IntakeState intakeState) {
-    if (goalState != intakeState) {
-      if (goalState == IntakeState.INTAKE_CONE || goalState == IntakeState.INTAKE_CUBE) {
+  public void setGoalState(IntakeState newState) {
+    if (goalState != newState) {
+      if (newState == IntakeState.INTAKE_CONE || newState == IntakeState.INTAKE_CUBE) {
         gamePiece = HeldGamePiece.NOTHING;
       }
+
+      intakeTimer.reset();
+      intakeTimer.start();
     }
 
-    goalState = intakeState;
+    goalState = newState;
   }
 
   @Override
@@ -47,31 +53,41 @@ public class IntakeSubsystem extends LifecycleSubsystem {
 
   @Override
   public void enabledPeriodic() {
-    if (goalState == IntakeState.OUTTAKE_CONE) {
+    if (goalState == IntakeState.MANUAL_INTAKE) {
+      motor.set(-0.6);
+    } else if (goalState == IntakeState.MANUAL_OUTTAKE) {
+      motor.set(0.6);
+    } else if (goalState == IntakeState.OUTTAKE_CONE) {
       motor.set(0.4);
     } else if (goalState == IntakeState.OUTTAKE_CUBE) {
-      motor.set(-0.3);
+      motor.set(0.3);
     } else if (gamePiece == HeldGamePiece.CUBE) {
-      motor.set(0.15);
+      motor.set(-0.75);
     } else if (gamePiece == HeldGamePiece.CONE) {
-      motor.set(-0.1);
+      motor.set(-0.6);
     } else if (goalState == IntakeState.INTAKE_CUBE) {
-      motor.set(0.5);
+      motor.set(-0.6);
     } else if (goalState == IntakeState.INTAKE_CONE) {
-      motor.set(-1);
+      motor.set(-0.6);
     } else {
       motor.disable();
     }
 
     // Game piece detection
-    double motorVelocity = velocityFilter.calculate(encoder.getVelocity());
-    double intakeVoltage = voltageFilter.calculate(motor.getAppliedOutput()) * 12.0;
+    double motorVelocity = Math.abs(velocityFilter.calculate(encoder.getVelocity()));
+    double intakeVoltage = Math.abs(voltageFilter.calculate(motor.getAppliedOutput()) * 12.0);
     double theoreticalSpeed = intakeVoltage * (5700.0 / 12.0); // Neo Max is 5700
     double threshold = theoreticalSpeed * 0.5;
-    if (motorVelocity < threshold && goalState == IntakeState.INTAKE_CONE) {
-      gamePiece = HeldGamePiece.CONE;
-    } else if (motorVelocity < threshold && goalState == IntakeState.INTAKE_CUBE) {
-      gamePiece = HeldGamePiece.CUBE;
+    Logger.getInstance().recordOutput("Intake/MotorVelocity", motorVelocity);
+    Logger.getInstance().recordOutput("Intake/IntakeVoltage", intakeVoltage);
+    Logger.getInstance().recordOutput("Intake/TheoreticalSpeed", theoreticalSpeed);
+    Logger.getInstance().recordOutput("Intake/Threshold", threshold);
+    if (intakeTimer.hasElapsed(0.75)) {
+      if (motorVelocity < threshold && goalState == IntakeState.INTAKE_CONE) {
+        gamePiece = HeldGamePiece.CONE;
+      } else if (motorVelocity < threshold && goalState == IntakeState.INTAKE_CUBE) {
+        gamePiece = HeldGamePiece.CUBE;
+      }
     } else if (motorVelocity > threshold
         && (goalState == IntakeState.OUTTAKE_CONE || goalState == IntakeState.OUTTAKE_CUBE)) {
       gamePiece = HeldGamePiece.NOTHING;

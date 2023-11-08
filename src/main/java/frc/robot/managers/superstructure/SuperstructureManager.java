@@ -10,12 +10,12 @@ import frc.robot.imu.ImuSubsystem;
 import frc.robot.intake.HeldGamePiece;
 import frc.robot.intake.IntakeState;
 import frc.robot.intake.IntakeSubsystem;
-import frc.robot.managers.autorotate.AutoRotate;
 import frc.robot.shoulder.ShoulderSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
 import frc.robot.wrist.WristSubsystem;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class SuperstructureManager extends LifecycleSubsystem {
   private final ImuSubsystem imu;
@@ -23,7 +23,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
   private final ShoulderSubsystem shoulder;
   private final WristSubsystem wrist;
   private final IntakeSubsystem intake;
-  private SuperstructureState goalState;
+  private SuperstructureState goalState = States.STOWED;
   private HeldGamePiece mode = HeldGamePiece.CUBE;
   private NodeHeight scoringHeight = null;
   private IntakeState manualIntakeState = null;
@@ -62,35 +62,70 @@ public class SuperstructureManager extends LifecycleSubsystem {
     }
   }
 
+  @Override
+  public void robotPeriodic() {
+    Logger.getInstance()
+        .recordOutput(
+            "Superstructure/GoalState/GoalWristAngle", goalState.position.wristAngle.getDegrees());
+    Logger.getInstance()
+        .recordOutput(
+            "Superstructure/GoalState/GoalShoulderAngle",
+            goalState.position.shoulderAngle.getDegrees());
+    Logger.getInstance()
+        .recordOutput("Superstructure/GoalState/GoalIntakeState", goalState.intakeState.toString());
+    Logger.getInstance()
+        .recordOutput("Superstructure/GoalState/GoalIntakeNow", goalState.intakeNow);
+    Logger.getInstance().recordOutput("Superstructure/Mode", mode.toString());
+    Logger.getInstance().recordOutput("Superstructure/ScoringProgress", scoringProgress.toString());
+    if (scoringHeight == null) {
+      Logger.getInstance().recordOutput("Superstructure/ScoringHeight", "(null)");
+    } else {
+      Logger.getInstance().recordOutput("Superstructure/ScoringHeight", scoringHeight.toString());
+    }
+    if (manualIntakeState == null) {
+      Logger.getInstance().recordOutput("Superstructure/ManualIntakeState", "(null)");
+    } else {
+      Logger.getInstance()
+          .recordOutput("Superstructure/ManualIntakeState", manualIntakeState.toString());
+    }
+  }
+
   public void setIntakeOverride(IntakeState intakeState) {
     manualIntakeState = intakeState;
   }
 
   public Command setIntakeOverrideCommand(IntakeState intakeState) {
     return runOnce(
-        () -> {
-          setIntakeOverride(intakeState);
-        });
+            () -> {
+              setIntakeOverride(intakeState);
+            })
+        .withName("IntakeOverrideCommand");
   }
 
   public Command setStateCommand(SuperstructureState newGoalState) {
-    return setStateCommand(() -> newGoalState);
+    return setStateCommand(() -> newGoalState).withName("SetStateCommand");
   }
 
   public Command setStateCommand(Supplier<SuperstructureState> newGoalState) {
-    return Commands.runOnce(() -> setGoal(newGoalState.get()))
-        .andThen(Commands.waitUntil(() -> atGoal(newGoalState.get())));
+    return Commands.runOnce(() -> setGoal(newGoalState.get()), wrist, shoulder)
+        .andThen(Commands.waitUntil(() -> atGoal(newGoalState.get())))
+        .withName("SetStateCommand");
   }
 
-  public void setMode(HeldGamePiece mode) {
-    this.mode = mode;
+  public void setMode(HeldGamePiece newMode) {
+    if (this.mode != newMode) {
+      intake.setGamePiece(HeldGamePiece.NOTHING);
+    }
+
+    this.mode = newMode;
   }
 
   public Command setModeCommand(HeldGamePiece mode) {
     return runOnce(
-        () -> {
-          setMode(mode);
-        });
+            () -> {
+              setMode(mode);
+            })
+        .withName("SetModeCommand");
   }
 
   public HeldGamePiece getMode() {
@@ -103,28 +138,43 @@ public class SuperstructureManager extends LifecycleSubsystem {
 
   public Command getIntakeFloorCommand() {
     return setStateCommand(
-        () -> {
-          if (mode == HeldGamePiece.CONE) {
-            return States.INTAKING_CONE_FLOOR;
-          } else {
-            return States.INTAKING_CUBE_FLOOR;
-          }
-        });
+            () -> {
+              if (mode == HeldGamePiece.CONE) {
+                return States.INTAKING_CONE_FLOOR;
+              } else {
+                return States.INTAKING_CUBE_FLOOR;
+              }
+            })
+        .andThen(stowFast())
+        .withName("IntakeFloorCommand");
   }
 
   public Command getIntakeShelfCommand() {
     return setStateCommand(
+            () -> {
+              if (mode == HeldGamePiece.CONE) {
+                return States.INTAKING_CONE_SHELF;
+              } else {
+                return States.INTAKING_CUBE_SHELF;
+              }
+            })
+        .andThen(stowFast())
+        .withName("IntakeShelfCommand");
+  }
+
+  private Command stowFast() {
+    return Commands.runOnce(
         () -> {
-          if (mode == HeldGamePiece.CONE) {
-            return States.INTAKING_CONE_SHELF;
-          } else {
-            return States.INTAKING_CUBE_SHELF;
-          }
-        });
+          setGoal(States.STOWED);
+        },
+        wrist,
+        shoulder);
   }
 
   public Command getIntakeSingleSubstationCommand() {
-    return setStateCommand(States.INTAKING_CONE_SINGLE_SUBSTATION);
+    return setStateCommand(States.INTAKING_CONE_SINGLE_SUBSTATION)
+        .andThen(stowFast())
+        .withName("IntakeSingleSubstationCommand");
   }
 
   private SuperstructureScoringState getScoringState(NodeHeight height) {
@@ -132,17 +182,18 @@ public class SuperstructureManager extends LifecycleSubsystem {
     SuperstructureScoringState coneState;
 
     if (height == NodeHeight.LOW) {
-      double heading = imu.getRobotHeading().getDegrees();
-      double leftAngle = AutoRotate.getLeftAngle().getDegrees();
-      double rightAngle = AutoRotate.getRightAngle().getDegrees();
-      if (heading < leftAngle && heading > rightAngle) {
-        cubeState = States.CUBE_NODE_LOW_FRONT;
-        coneState = States.CONE_NODE_LOW_FRONT;
-      } else {
-        cubeState = States.CUBE_NODE_LOW_BACK;
-        coneState = States.CONE_NODE_LOW_BACK;
-      }
-
+      // double heading = imu.getRobotHeading().getDegrees();
+      // double leftAngle = AutoRotate.getLeftAngle().getDegrees();
+      // double rightAngle = AutoRotate.getRightAngle().getDegrees();
+      // if (heading < leftAngle && heading > rightAngle) {
+      //   cubeState = States.CUBE_NODE_LOW_FRONT;
+      //   coneState = States.CONE_NODE_LOW_FRONT;
+      // } else {
+      //   cubeState = States.CUBE_NODE_LOW_BACK;
+      //   coneState = States.CONE_NODE_LOW_BACK;
+      // }
+      cubeState = States.CUBE_NODE_LOW_BACK;
+      coneState = States.CONE_NODE_LOW_BACK;
     } else if (height == NodeHeight.MID) {
       cubeState = States.CUBE_NODE_MID;
       coneState = States.CONE_NODE_MID;
@@ -158,37 +209,36 @@ public class SuperstructureManager extends LifecycleSubsystem {
     }
   }
 
-  public Command getScoreAlignCommand(NodeHeight height) {
+  public Command getScoreAlignCommand(Supplier<NodeHeight> height) {
     return Commands.runOnce(
             () -> {
-              scoringHeight = height;
+              scoringHeight = height.get();
               scoringProgress = ScoringProgress.ALIGNING;
             })
-        .andThen(setStateCommand(getScoringState(height).aligning));
+        .andThen(setStateCommand(() -> getScoringState(height.get()).aligning))
+        .withName("ScoreAlignCommand");
   }
 
   public Command getScoreFinishCommand() {
-    return getScoreFinishCommand(scoringHeight == null ? NodeHeight.LOW : scoringHeight);
+    return getScoreFinishCommand(() -> scoringHeight == null ? NodeHeight.LOW : scoringHeight)
+        .withName("ScoreFinishCommand");
   }
 
-  public Command getScoreFinishCommand(NodeHeight height) {
+  public Command getScoreFinishCommand(Supplier<NodeHeight> height) {
     return Commands.runOnce(
             () -> {
-              scoringHeight = height;
+              scoringHeight = height.get();
               scoringProgress = ScoringProgress.PLACING;
             })
-        .andThen(setStateCommand(getScoringState(height).scoring))
+        .andThen(setStateCommand(() -> getScoringState(height.get()).aligning))
+        .andThen(setStateCommand(() -> getScoringState(height.get()).scoring))
         .andThen(
             Commands.runOnce(
                 () -> {
                   scoringHeight = null;
                   scoringProgress = ScoringProgress.DONE_SCORING;
-                }));
+                }))
+        .andThen(stowFast().unless(() -> height.get() != NodeHeight.LOW))
+        .withName("ScoreFinishCommand");
   }
-
-  // public Command yeetConeCommand() {
-  //   return Commands.runOnce(() -> (setStateCommand(States.YEET_CONE)))
-  //       .waitUntil(atGoal(States.YEET_CONE))
-  //       .andThen(setStateCommand(States.STOWED));
-  // }
 }

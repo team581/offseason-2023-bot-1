@@ -20,7 +20,9 @@ public class SuperstructurePosition {
     if (obj instanceof SuperstructurePosition) {
       SuperstructurePosition position = (SuperstructurePosition) obj;
 
-      return shoulderAngle.equals(position.shoulderAngle) && wristAngle.equals(position.wristAngle);
+      return this == obj
+          || (shoulderAngle.equals(position.shoulderAngle)
+              && wristAngle.equals(position.wristAngle));
     }
 
     return false;

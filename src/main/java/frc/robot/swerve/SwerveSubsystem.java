@@ -39,7 +39,7 @@ public class SwerveSubsystem extends LifecycleSubsystem {
           FRONT_LEFT_LOCATION, FRONT_RIGHT_LOCATION, BACK_LEFT_LOCATION, BACK_RIGHT_LOCATION);
   public static final double MAX_VELOCITY =
       ((6080.0 / 60.0) / Config.SWERVE_DRIVE_GEARING_REDUCTION) * (Config.WHEEL_DIAMETER * Math.PI);
-  public static final double MAX_ANGULAR_VELOCITY = 20;
+  public static final double MAX_ANGULAR_VELOCITY = 15;
 
   private final ImuSubsystem imu;
   private final SwerveModule frontRight;
@@ -144,6 +144,14 @@ public class SwerveSubsystem extends LifecycleSubsystem {
     if (xSwerveEnabled) {
       xSwerve();
     }
+  }
+
+  @Override
+  public void disabledPeriodic() {
+    frontLeft.resetSteerMotorAngle();
+    frontRight.resetSteerMotorAngle();
+    backLeft.resetSteerMotorAngle();
+    backRight.resetSteerMotorAngle();
   }
 
   public ChassisSpeeds getChassisSpeeds() {

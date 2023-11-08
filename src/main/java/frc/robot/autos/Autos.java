@@ -5,6 +5,7 @@
 package frc.robot.autos;
 
 import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.pathplanner.lib.server.PathPlannerServer;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,18 +18,84 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.config.Config;
 import frc.robot.fms.FmsSubsystem;
+import frc.robot.intake.IntakeSubsystem;
+import frc.robot.localization.LocalizationSubsystem;
+import frc.robot.managers.autobalance.Autobalance;
+import frc.robot.swerve.SwerveSubsystem;
+import frc.robot.wrist.WristSubsystem;
 import java.lang.ref.WeakReference;
 import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class Autos {
+  private static Command wrapAutoEvent(String commandName, Command command) {
+    return Commands.sequence(
+            Commands.print("[COMMANDS] Starting auto event " + commandName),
+            command.deadlineWith(
+                Commands.waitSeconds(5)
+                    .andThen(
+                        Commands.print(
+                            "[COMMANDS] Auto event "
+                                + commandName
+                                + " has been running for 5+ seconds!"))),
+            Commands.print("[COMMANDS] Finished auto event " + commandName))
+        .handleInterrupt(() -> System.out.println("[COMMANDS] Cancelled auto event " + commandName))
+        .withName(commandName);
+  }
+
+  private static Map<String, Command> wrapAutoEventMap(Map<String, Command> eventMap) {
+    Map<String, Command> wrappedMap = new HashMap<>();
+    for (Map.Entry<String, Command> entry : eventMap.entrySet()) {
+      wrappedMap.put(
+          entry.getKey(), wrapAutoEvent("AutoEvent_" + entry.getKey(), entry.getValue()));
+    }
+    return wrappedMap;
+  }
+
   private final LoggedDashboardChooser<AutoKindWithoutTeam> autoChooser =
       new LoggedDashboardChooser<>("Auto Choices");
   private final Map<AutoKind, WeakReference<Command>> autosCache = new EnumMap<>(AutoKind.class);
+  private final SwerveAutoBuilder autoBuilder;
+  private final LocalizationSubsystem localization;
+  private final SwerveSubsystem swerve;
+  private final IntakeSubsystem intake;
+  private final WristSubsystem wrist;
+  private final Autobalance autobalance;
 
-  public Autos() {
+  public Autos(
+      LocalizationSubsystem localization,
+      SwerveSubsystem swerve,
+      IntakeSubsystem intake,
+      WristSubsystem wrist,
+      Autobalance autobalance) {
+
+    this.localization = localization;
+    this.swerve = swerve;
+    this.intake = intake;
+    this.wrist = wrist;
+    this.autobalance = autobalance;
+
+    Map<String, Command> eventMap = Map.ofEntries();
+
+    eventMap = wrapAutoEventMap(eventMap);
+
+    autoBuilder =
+        new SwerveAutoBuilder(
+            localization::getPose,
+            localization::resetPose,
+            SwerveSubsystem.KINEMATICS,
+            Config.SWERVE_TRANSLATION_PID,
+            Config.SWERVE_ROTATION_PID,
+            (states) -> swerve.setModuleStates(states, false, false),
+            eventMap,
+            false,
+            swerve);
+
     CommandScheduler.getInstance()
         .onCommandInitialize(
             command -> System.out.println("[COMMANDS] Starting command " + command.getName()));
@@ -39,7 +106,9 @@ public class Autos {
         .onCommandFinish(
             command -> System.out.println("[COMMANDS] Finished command " + command.getName()));
 
-    autoChooser.addOption("Do nothing", AutoKindWithoutTeam.DO_NOTHING);
+    for (AutoKindWithoutTeam autoKind : EnumSet.allOf(AutoKindWithoutTeam.class)) {
+      autoChooser.addOption(autoKind.toString(), autoKind);
+    }
 
     if (Config.IS_DEVELOPMENT) {
       PathPlannerServer.startServer(5811);
@@ -76,6 +145,38 @@ public class Autos {
         });
   }
 
+  private Command buildAutoCommand(AutoKind auto) {
+    WeakReference<Command> ref = autosCache.get(auto);
+    if (ref != null && ref.get() != null) {
+      Command autoCommand = ref.get();
+
+      if (autoCommand != null) {
+        return autoCommand;
+      }
+    }
+
+    String autoName = "Auto" + auto.toString();
+    Command autoCommand = Commands.runOnce(() -> swerve.driveTeleop(0, 0, 0, true, true), swerve);
+
+    if (auto == AutoKind.DO_NOTHING) {
+      return autoCommand.andThen(localization.getZeroAwayCommand()).withName(autoName);
+    }
+
+    List<PathPlannerTrajectory> pathGroup = Paths.getInstance().getPath(auto);
+
+    autoCommand = autoCommand.andThen(autoBuilder.fullAuto(pathGroup));
+
+    if (auto.autoBalance) {
+      autoCommand = autoCommand.andThen(this.autobalance.getCommand());
+    }
+
+    autoCommand = autoCommand.withName(autoName);
+
+    autosCache.put(auto, new WeakReference<>(autoCommand));
+
+    return autoCommand;
+  }
+
   public Command getAutoCommand() {
     AutoKindWithoutTeam rawAuto = autoChooser.get();
 
@@ -89,7 +190,7 @@ public class Autos {
       return Commands.none();
     }
 
-    return null;
+    return buildAutoCommand(auto);
   }
 
   public void clearCache() {

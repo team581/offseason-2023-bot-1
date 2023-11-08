@@ -4,14 +4,14 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -26,6 +26,8 @@ import frc.robot.imu.ImuSubsystem;
 import frc.robot.intake.HeldGamePiece;
 import frc.robot.intake.IntakeState;
 import frc.robot.intake.IntakeSubsystem;
+import frc.robot.lights.LightsSubsystem;
+import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.managers.autobalance.Autobalance;
 import frc.robot.managers.autorotate.AutoRotate;
 import frc.robot.managers.superstructure.NodeHeight;
@@ -50,32 +52,32 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
  */
 public class Robot extends LoggedRobot {
   // Enables power distribution logging
-  private final PowerDistribution pdpLogging =
-      new PowerDistribution(Config.PDP_ID, ModuleType.kRev);
+  // private final PowerDistribution pdpLogging =
+  //     new PowerDistribution(Config.PDP_ID, ModuleType.kRev);
   private final SwerveModule frontLeft =
       new SwerveModule(
           Config.SWERVE_FL_CONSTANTS,
-          new TalonFX(Config.SWERVE_FL_DRIVE_MOTOR_ID, Config.CANIVORE_ID),
-          new TalonFX(Config.SWERVE_FL_STEER_MOTOR_ID, Config.CANIVORE_ID),
-          new CANcoder(Config.SWERVE_FL_CANCODER_ID, Config.CANIVORE_ID));
+          new TalonFX(Config.SWERVE_FL_DRIVE_MOTOR_ID),
+          new CANSparkMax(Config.SWERVE_FL_STEER_MOTOR_ID, CANSparkMax.MotorType.kBrushless),
+          new CANcoder(Config.SWERVE_FL_CANCODER_ID));
   private final SwerveModule frontRight =
       new SwerveModule(
           Config.SWERVE_FR_CONSTANTS,
-          new TalonFX(Config.SWERVE_FR_DRIVE_MOTOR_ID, Config.CANIVORE_ID),
-          new TalonFX(Config.SWERVE_FR_STEER_MOTOR_ID, Config.CANIVORE_ID),
-          new CANcoder(Config.SWERVE_FR_CANCODER_ID, Config.CANIVORE_ID));
+          new TalonFX(Config.SWERVE_FR_DRIVE_MOTOR_ID),
+          new CANSparkMax(Config.SWERVE_FR_STEER_MOTOR_ID, CANSparkMax.MotorType.kBrushless),
+          new CANcoder(Config.SWERVE_FR_CANCODER_ID));
   private final SwerveModule backLeft =
       new SwerveModule(
           Config.SWERVE_BL_CONSTANTS,
-          new TalonFX(Config.SWERVE_BL_DRIVE_MOTOR_ID, Config.CANIVORE_ID),
-          new TalonFX(Config.SWERVE_BL_STEER_MOTOR_ID, Config.CANIVORE_ID),
-          new CANcoder(Config.SWERVE_BL_CANCODER_ID, Config.CANIVORE_ID));
+          new TalonFX(Config.SWERVE_BL_DRIVE_MOTOR_ID),
+          new CANSparkMax(Config.SWERVE_BL_STEER_MOTOR_ID, CANSparkMax.MotorType.kBrushless),
+          new CANcoder(Config.SWERVE_BL_CANCODER_ID));
   private final SwerveModule backRight =
       new SwerveModule(
           Config.SWERVE_BR_CONSTANTS,
-          new TalonFX(Config.SWERVE_BR_DRIVE_MOTOR_ID, Config.CANIVORE_ID),
-          new TalonFX(Config.SWERVE_BR_STEER_MOTOR_ID, Config.CANIVORE_ID),
-          new CANcoder(Config.SWERVE_BR_CANCODER_ID, Config.CANIVORE_ID));
+          new TalonFX(Config.SWERVE_BR_DRIVE_MOTOR_ID),
+          new CANSparkMax(Config.SWERVE_BR_STEER_MOTOR_ID, CANSparkMax.MotorType.kBrushless),
+          new CANcoder(Config.SWERVE_BR_CANCODER_ID));
 
   private final DriveController driveController = new DriveController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
@@ -83,8 +85,6 @@ public class Robot extends LoggedRobot {
       new RumbleControllerSubsystem(new XboxController(1));
 
   private final FmsSubsystem fmsSubsystem = new FmsSubsystem();
-
-  private final Autos autos = new Autos();
 
   private final ShoulderSubsystem shoulder =
       new ShoulderSubsystem(
@@ -96,8 +96,7 @@ public class Robot extends LoggedRobot {
       new IntakeSubsystem(new CANSparkMax(Config.INTAKE_ID, MotorType.kBrushless));
   private final SuperstructureMotionManager motionManager =
       new SuperstructureMotionManager(shoulder, wrist);
-  private final ImuSubsystem imu =
-      new ImuSubsystem(new Pigeon2(Config.PIGEON2_ID, Config.CANIVORE_ID));
+  private final ImuSubsystem imu = new ImuSubsystem(new Pigeon2(Config.PIGEON2_ID));
   private final SuperstructureManager superstructure =
       new SuperstructureManager(motionManager, intake, imu);
   private final SwerveSubsystem swerve =
@@ -105,6 +104,13 @@ public class Robot extends LoggedRobot {
 
   private final Autobalance autobalance = new Autobalance(swerve, imu);
   private final AutoRotate autoRotate = new AutoRotate(swerve);
+
+  private final LocalizationSubsystem localization = new LocalizationSubsystem(swerve, imu);
+
+  private final LightsSubsystem lights =
+      new LightsSubsystem(new CANdle(Config.CANDLE_ID), intake, superstructure);
+
+  private final Autos autos = new Autos(localization, swerve, intake, wrist, autobalance);
 
   private Command autoCommand;
 
@@ -144,6 +150,8 @@ public class Robot extends LoggedRobot {
     configureButtonBindings();
 
     enableLiveWindowInTest(false);
+
+    SmartDashboard.putData(CommandScheduler.getInstance());
   }
 
   /**
@@ -162,7 +170,7 @@ public class Robot extends LoggedRobot {
     // driveController.leftStick();
     // driveController.rightStick();
     driveController.leftTrigger(0.3).onTrue(superstructure.getIntakeFloorCommand());
-    driveController.leftBumper().onTrue(superstructure.getIntakeShelfCommand());
+    // driveController.leftBumper().onTrue(superstructure.getIntakeShelfCommand());
     driveController.rightTrigger(0.3).onTrue(superstructure.getScoreFinishCommand());
     driveController.rightBumper().onTrue(superstructure.getIntakeSingleSubstationCommand());
     driveController.back().onTrue(imu.getZeroCommand());
@@ -188,9 +196,13 @@ public class Robot extends LoggedRobot {
         .onFalse(swerve.disableXSwerveCommand());
 
     // Operator controls
-    operatorController.y().onTrue(superstructure.getScoreAlignCommand(NodeHeight.HIGH));
-    operatorController.b().onTrue(superstructure.getScoreAlignCommand(NodeHeight.MID));
-    operatorController.a().onTrue(superstructure.setStateCommand(States.STOWED));
+    operatorController.y().onTrue(superstructure.getScoreAlignCommand(() -> NodeHeight.HIGH));
+    operatorController.b().onTrue(superstructure.getScoreAlignCommand(() -> NodeHeight.MID));
+    // A or X for stow
+    operatorController
+        .a()
+        .or(operatorController.x())
+        .onTrue(superstructure.setStateCommand(States.STOWED));
 
     // Manual intake override
     operatorController
