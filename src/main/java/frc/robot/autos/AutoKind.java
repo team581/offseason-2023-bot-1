@@ -9,10 +9,11 @@ import com.pathplanner.lib.PathConstraints;
 public enum AutoKind {
   DO_NOTHING("", 0.01, 0.01, false),
 
-  BLUE_SHORT_SIDE_3("BlueShortSide3", 4, 4, false),
-  BLUE_LONG_SIDE_3("BlueShortSide3", 4, 4, false),
-  RED_SHORT_SIDE_3("RedShortSide3", 4, 4, false),
-  RED_LONG_SIDE_3("RedShortSide3", 4, 4, false);
+  BLUE_FLAT_SIDE_3("BlueShortSide3", 4, 4, false),
+  BLUE_BUMP_SIDE_3("BlueLongSide3", 4, 4, false),
+  RED_FLAT_SIDE_3("RedShortSide3", 4, 4, false),
+  RED_BUMP_SIDE_3("RedLongSide3", 4, 4, false),
+  TEST("test", 2, 2, false);
 
   public final String pathName;
   public final PathConstraints constraints;

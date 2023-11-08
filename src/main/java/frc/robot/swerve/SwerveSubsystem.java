@@ -4,8 +4,6 @@
 
 package frc.robot.swerve;
 
-import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -24,7 +22,6 @@ import frc.robot.config.Config;
 import frc.robot.controller.DriveController;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.imu.ImuSubsystem;
-import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
 import org.littletonrobotics.junction.Logger;
@@ -206,7 +203,7 @@ public class SwerveSubsystem extends LifecycleSubsystem {
     Logger.getInstance().recordOutput("Swerve/CommandedSpeeds/Omega", speeds.omegaRadiansPerSecond);
 
     // Twist computation.
-    double lookAheadSeconds = 0.1;
+    double lookAheadSeconds = 0.02;
     Pose2d target_pose =
         new Pose2d(
             lookAheadSeconds * speeds.vxMetersPerSecond,
@@ -293,56 +290,5 @@ public class SwerveSubsystem extends LifecycleSubsystem {
             },
             this)
         .withName("SwerveDriveTeleop");
-  }
-
-  public Command getFollowTrajectoryCommand(
-      PathPlannerTrajectory traj, LocalizationSubsystem localization) {
-    return new PPSwerveControllerCommand(
-            traj,
-            localization::getPose,
-            SwerveSubsystem.KINEMATICS,
-            // x controller
-            xController,
-            // y controller
-            yController,
-            // theta controller
-            thetaController,
-            states -> setModuleStates(states, false, false),
-            false,
-            this)
-        .withName("SwerveFollowTrajectory");
-  }
-
-  // Create a command that accepts a Pose2d and drives to it using a PPHolonomicDriveController
-  // The command should exit once it's at the pose
-  public Command goToPoseCommand(Pose2d goal, LocalizationSubsystem localization) {
-    return run(() -> {
-          Logger.getInstance().recordOutput("AutoAlign/TargetPose", goal);
-          Pose2d pose = localization.getPose();
-          double xVelocity = xProfiledController.calculate(pose.getX(), goal.getX());
-          double yVelocity = yProfiledController.calculate(pose.getY(), goal.getY());
-          double thetaVelocity =
-              thetaProfiledController.calculate(
-                  pose.getRotation().getRadians(), goal.getRotation().getRadians());
-
-          ChassisSpeeds chassisSpeeds =
-              ChassisSpeeds.fromFieldRelativeSpeeds(
-                  xVelocity, yVelocity, thetaVelocity, pose.getRotation());
-
-          setChassisSpeeds(chassisSpeeds, false);
-        })
-        .until(
-            () -> {
-              // 3 degree rotation and 0.1 meter distance
-              Pose2d pose = localization.getPose();
-              double distanceRelative = goal.getTranslation().getDistance(pose.getTranslation());
-              Rotation2d rotationDifference = goal.getRotation().minus(pose.getRotation());
-              if (distanceRelative < 0.1 && Math.abs(rotationDifference.getDegrees()) < 3) {
-                return true;
-              } else {
-                return false;
-              }
-            })
-        .withName("SwerveGoToPose");
   }
 }

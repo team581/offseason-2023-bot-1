@@ -17,7 +17,6 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "home",
           "preloadCone",
           "scoreHigh",
           "stowFast"
@@ -183,11 +182,11 @@
     {
       "anchorPoint": {
         "x": 1.79,
-        "y": 1.6184839970630058
+        "y": 1.07
       },
       "prevControl": {
         "x": 2.248429593013034,
-        "y": 1.6186670834880137
+        "y": 1.070183086425008
       },
       "nextControl": null,
       "holonomicAngle": 180.0,
@@ -197,7 +196,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "scoreHigh",
+          "scoreMid",
           "stowFast"
         ],
         "executionBehavior": "sequential",

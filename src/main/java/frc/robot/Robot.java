@@ -110,7 +110,8 @@ public class Robot extends LoggedRobot {
   private final LightsSubsystem lights =
       new LightsSubsystem(new CANdle(Config.CANDLE_ID), intake, superstructure);
 
-  private final Autos autos = new Autos(localization, swerve, intake, wrist, autobalance);
+  private final Autos autos =
+      new Autos(localization, swerve, intake, wrist, autobalance, superstructure);
 
   private Command autoCommand;
 
@@ -173,7 +174,7 @@ public class Robot extends LoggedRobot {
     // driveController.leftBumper().onTrue(superstructure.getIntakeShelfCommand());
     driveController.rightTrigger(0.3).onTrue(superstructure.getScoreFinishCommand());
     driveController.rightBumper().onTrue(superstructure.getIntakeSingleSubstationCommand());
-    driveController.back().onTrue(imu.getZeroCommand());
+    driveController.back().onTrue(localization.getZeroCommand());
 
     driveController.povUp().onTrue(superstructure.setModeCommand(HeldGamePiece.CUBE));
     driveController.povDown().onTrue(superstructure.setModeCommand(HeldGamePiece.CONE));

@@ -27,6 +27,7 @@ public class ImuSubsystem extends LifecycleSubsystem {
     imu.getConfigurator().apply(imuConfig);
   }
 
+  @Override
   public void robotPeriodic() {
     Logger.getInstance().recordOutput("Imu/RobotHeading", this.getRobotHeading().getDegrees());
     Logger.getInstance()
