@@ -83,9 +83,9 @@ public class SwerveModule {
     driveMotorConfigs.Voltage.PeakForwardVoltage = 12;
     driveMotorConfigs.Voltage.PeakReverseVoltage = -12;
 
-    CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
-    currentLimits.SupplyCurrentLimit = 35;
-    currentLimits.SupplyCurrentLimitEnable = true;
+    driveMotorConfigs.CurrentLimits.SupplyCurrentLimit = 15;
+    driveMotorConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
+    driveMotorConfigs.CurrentLimits.StatorCurrentLimitEnable = false;
 
     if (constants.driveInversion) {
       driveMotorConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
@@ -121,7 +121,7 @@ public class SwerveModule {
     steerMotorPID.setPositionPIDWrappingMinInput(0.0);
     steerMotorPID.setPositionPIDWrappingMaxInput(1.0);
 
-    steerMotor.setSmartCurrentLimit(35);
+    steerMotor.setSmartCurrentLimit(15);
 
     steerMotor.setInverted(constants.angleInversion);
 
