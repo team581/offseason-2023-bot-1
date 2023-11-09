@@ -41,9 +41,6 @@ public class States {
   public static final SuperstructureScoringState CONE_NODE_HIGH =
       new SuperstructureScoringState(Positions.CONE_NODE_HIGH, IntakeState.OUTTAKE_CONE);
 
-  public static final SuperstructureState YEET_CONE =
-      new SuperstructureState(Positions.YEET_CONE, IntakeState.OUTTAKE_CONE, true);
-
   // Template to save time: public static final SuperstructureState  = new
   // SuperstructureState(positions.);
 
