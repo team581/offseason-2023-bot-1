@@ -234,7 +234,7 @@ public class Autos {
 
     autoCommand =
         autoCommand
-            .andThen(superstructure.setStateCommand(States.STOWED))
+            .andThen(superstructure.setStateCommand(States.STOWED).withTimeout(3))
             .andThen(autoBuilder.fullAuto(pathGroup));
 
     if (auto.autoBalance) {
