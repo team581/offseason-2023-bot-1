@@ -5,6 +5,7 @@
 package frc.robot.autos;
 
 import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.pathplanner.lib.server.PathPlannerServer;
@@ -18,9 +19,13 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.config.Config;
 import frc.robot.fms.FmsSubsystem;
+import frc.robot.intake.HeldGamePiece;
 import frc.robot.intake.IntakeSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.managers.autobalance.Autobalance;
+import frc.robot.managers.superstructure.NodeHeight;
+import frc.robot.managers.superstructure.States;
+import frc.robot.managers.superstructure.SuperstructureManager;
 import frc.robot.swerve.SwerveSubsystem;
 import frc.robot.wrist.WristSubsystem;
 import java.lang.ref.WeakReference;
@@ -66,32 +71,95 @@ public class Autos {
   private final IntakeSubsystem intake;
   private final WristSubsystem wrist;
   private final Autobalance autobalance;
+  private final SuperstructureManager superstructure;
 
   public Autos(
       LocalizationSubsystem localization,
       SwerveSubsystem swerve,
       IntakeSubsystem intake,
       WristSubsystem wrist,
-      Autobalance autobalance) {
+      Autobalance autobalance,
+      SuperstructureManager superstructure) {
 
     this.localization = localization;
     this.swerve = swerve;
     this.intake = intake;
     this.wrist = wrist;
     this.autobalance = autobalance;
+    this.superstructure = superstructure;
 
-    Map<String, Command> eventMap = Map.ofEntries();
+    Map<String, Command> eventMap =
+        Map.ofEntries(
+            Map.entry(
+                "preloadCube",
+                Commands.runOnce(
+                    () -> {
+                      superstructure.setMode(HeldGamePiece.CUBE);
+                      intake.setGamePiece(HeldGamePiece.CUBE);
+                    })),
+            Map.entry(
+                "preloadCone",
+                Commands.runOnce(
+                    () -> {
+                      superstructure.setMode(HeldGamePiece.CONE);
+                      intake.setGamePiece(HeldGamePiece.CONE);
+                    })),
+            Map.entry(
+                "scoreLow",
+                superstructure
+                    .getScoreFinishCommand(() -> NodeHeight.LOW)
+                    .withTimeout(1)
+                    .andThen(Commands.runOnce(() -> intake.setGamePiece(HeldGamePiece.NOTHING)))),
+            Map.entry(
+                "scoreMid",
+                superstructure
+                    .getScoreFinishCommand(() -> NodeHeight.MID)
+                    .withTimeout(3)
+                    .andThen(Commands.runOnce(() -> intake.setGamePiece(HeldGamePiece.NOTHING)))),
+            Map.entry(
+                "scoreHigh",
+                superstructure
+                    .getScoreFinishCommand(() -> NodeHeight.HIGH)
+                    .withTimeout(3)
+                    .andThen(Commands.runOnce(() -> intake.setGamePiece(HeldGamePiece.NOTHING)))),
+            Map.entry(
+                "superstructureLow", superstructure.getScoreAlignCommand(() -> NodeHeight.LOW)),
+            Map.entry(
+                "superstructureMid", superstructure.getScoreAlignCommand(() -> NodeHeight.MID)),
+            Map.entry(
+                "superstructureHigh", superstructure.getScoreAlignCommand(() -> NodeHeight.HIGH)),
+            Map.entry(
+                "intakeCone",
+                Commands.runOnce(() -> superstructure.setMode(HeldGamePiece.CONE))
+                    .andThen(superstructure.getIntakeFloorCommand())),
+            Map.entry(
+                "intakeCube",
+                Commands.runOnce(() -> superstructure.setMode(HeldGamePiece.CUBE))
+                    .andThen(superstructure.getIntakeFloorCommand())),
+            Map.entry("stow", superstructure.setStateCommand(States.STOWED)),
+            Map.entry("stowFast", superstructure.stowFast()));
 
     eventMap = wrapAutoEventMap(eventMap);
+
+    PIDConstants rotationPid = Config.SWERVE_ROTATION_PID;
+    PIDConstants translationPid = Config.SWERVE_TRANSLATION_PID;
+
+    if (Config.SWERVE_ROTATION_PID_INVERT) {
+      rotationPid = new PIDConstants(rotationPid.kP * -1, rotationPid.kI, rotationPid.kD * -1);
+    }
+
+    if (Config.SWERVE_TRANSLATION_PID_INVERT) {
+      translationPid =
+          new PIDConstants(translationPid.kP * -1, translationPid.kI, translationPid.kD * -1);
+    }
 
     autoBuilder =
         new SwerveAutoBuilder(
             localization::getPose,
             localization::resetPose,
-            SwerveSubsystem.KINEMATICS,
-            Config.SWERVE_TRANSLATION_PID,
-            Config.SWERVE_ROTATION_PID,
-            (states) -> swerve.setModuleStates(states, false, false),
+            translationPid,
+            rotationPid,
+            (states) -> swerve.setChassisSpeeds(states, false),
             eventMap,
             false,
             swerve);
@@ -164,7 +232,10 @@ public class Autos {
 
     List<PathPlannerTrajectory> pathGroup = Paths.getInstance().getPath(auto);
 
-    autoCommand = autoCommand.andThen(autoBuilder.fullAuto(pathGroup));
+    autoCommand =
+        autoCommand
+            .andThen(superstructure.setStateCommand(States.STOWED))
+            .andThen(autoBuilder.fullAuto(pathGroup));
 
     if (auto.autoBalance) {
       autoCommand = autoCommand.andThen(this.autobalance.getCommand());

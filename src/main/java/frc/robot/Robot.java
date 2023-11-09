@@ -110,7 +110,8 @@ public class Robot extends LoggedRobot {
   private final LightsSubsystem lights =
       new LightsSubsystem(new CANdle(Config.CANDLE_ID), intake, superstructure);
 
-  private final Autos autos = new Autos(localization, swerve, intake, wrist, autobalance);
+  private final Autos autos =
+      new Autos(localization, swerve, intake, wrist, autobalance, superstructure);
 
   private Command autoCommand;
 
@@ -173,15 +174,15 @@ public class Robot extends LoggedRobot {
     // driveController.leftBumper().onTrue(superstructure.getIntakeShelfCommand());
     driveController.rightTrigger(0.3).onTrue(superstructure.getScoreFinishCommand());
     driveController.rightBumper().onTrue(superstructure.getIntakeSingleSubstationCommand());
-    driveController.back().onTrue(imu.getZeroCommand());
+    driveController.back().onTrue(localization.getZeroCommand());
 
     driveController.povUp().onTrue(superstructure.setModeCommand(HeldGamePiece.CUBE));
     driveController.povDown().onTrue(superstructure.setModeCommand(HeldGamePiece.CONE));
-    // Snaps for all cardinal directions
-    driveController.x().onTrue(autoRotate.getCommand(() -> AutoRotate.getLeftAngle()));
-    driveController.b().onTrue(autoRotate.getCommand(() -> AutoRotate.getRightAngle()));
-    driveController.y().onTrue(autoRotate.getCommand(() -> AutoRotate.getForwardAngle()));
-    driveController.a().onTrue(autoRotate.getCommand(() -> AutoRotate.getBackwardsAngle()));
+    // Snaps for all cardinal directions - we treat the back of the robot as the front
+    driveController.b().onTrue(autoRotate.getCommand(() -> AutoRotate.getLeftAngle()));
+    driveController.x().onTrue(autoRotate.getCommand(() -> AutoRotate.getRightAngle()));
+    driveController.a().onTrue(autoRotate.getCommand(() -> AutoRotate.getForwardAngle()));
+    driveController.y().onTrue(autoRotate.getCommand(() -> AutoRotate.getBackwardsAngle()));
 
     new Trigger(() -> driveController.getThetaPercentage() == 0)
         .onFalse(autoRotate.getDisableCommand());

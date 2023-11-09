@@ -4,10 +4,7 @@
 
 package frc.robot.swerve;
 
-import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -16,7 +13,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -24,7 +20,6 @@ import frc.robot.config.Config;
 import frc.robot.controller.DriveController;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.imu.ImuSubsystem;
-import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
 import org.littletonrobotics.junction.Logger;
@@ -46,50 +41,15 @@ public class SwerveSubsystem extends LifecycleSubsystem {
   private final SwerveModule frontLeft;
   private final SwerveModule backRight;
   private final SwerveModule backLeft;
-  private boolean doneResetting = false;
 
   private boolean snapToAngle = false;
   private boolean xSwerveEnabled = false;
 
-  private final PIDController xController =
-      new PIDController(
-          Config.SWERVE_TRANSLATION_PID.kP,
-          Config.SWERVE_TRANSLATION_PID.kI,
-          Config.SWERVE_TRANSLATION_PID.kD);
-  private final PIDController yController =
-      new PIDController(
-          Config.SWERVE_TRANSLATION_PID.kP,
-          Config.SWERVE_TRANSLATION_PID.kI,
-          Config.SWERVE_TRANSLATION_PID.kD);
-  private final PIDController thetaController =
-      new PIDController(
-          Config.SWERVE_ROTATION_PID.kP,
-          Config.SWERVE_ROTATION_PID.kI,
-          Config.SWERVE_ROTATION_PID.kD);
   private final PIDController snapThetaController =
       new PIDController(
           Config.SWERVE_ROTATION_SNAP_PID.kP,
           Config.SWERVE_ROTATION_SNAP_PID.kI,
           Config.SWERVE_ROTATION_SNAP_PID.kD);
-
-  private final ProfiledPIDController xProfiledController =
-      new ProfiledPIDController(
-          Config.SWERVE_TRANSLATION_PID.kP,
-          Config.SWERVE_TRANSLATION_PID.kI,
-          Config.SWERVE_TRANSLATION_PID.kD,
-          new TrapezoidProfile.Constraints(2.0, 1.5));
-  private final ProfiledPIDController yProfiledController =
-      new ProfiledPIDController(
-          Config.SWERVE_TRANSLATION_PID.kP,
-          Config.SWERVE_TRANSLATION_PID.kI,
-          Config.SWERVE_TRANSLATION_PID.kD,
-          new TrapezoidProfile.Constraints(2.0, 1.5));
-  private final ProfiledPIDController thetaProfiledController =
-      new ProfiledPIDController(
-          Config.SWERVE_ROTATION_PID.kP,
-          Config.SWERVE_ROTATION_PID.kI,
-          Config.SWERVE_ROTATION_PID.kD,
-          new TrapezoidProfile.Constraints(Math.PI * 2.0, Math.PI * 0.75));
   private Rotation2d goalAngle = new Rotation2d();
 
   public SwerveSubsystem(
@@ -106,9 +66,7 @@ public class SwerveSubsystem extends LifecycleSubsystem {
     this.backRight = backRight;
     this.backLeft = backLeft;
 
-    thetaController.enableContinuousInput(-Math.PI, Math.PI);
     snapThetaController.enableContinuousInput(-Math.PI, Math.PI);
-    thetaProfiledController.enableContinuousInput(-Math.PI, Math.PI);
   }
 
   @Override
@@ -201,12 +159,17 @@ public class SwerveSubsystem extends LifecycleSubsystem {
       speeds.omegaRadiansPerSecond =
           snapThetaController.calculate(imu.getRobotHeading().getRadians(), goalAngle.getRadians());
     }
+
+    if (Config.SWERVE_ROTATION_SNAP_PID_INVERT) {
+      speeds.omegaRadiansPerSecond = speeds.omegaRadiansPerSecond * -1;
+    }
+
     Logger.getInstance().recordOutput("Swerve/CommandedSpeeds/X", speeds.vxMetersPerSecond);
     Logger.getInstance().recordOutput("Swerve/CommandedSpeeds/Y", speeds.vyMetersPerSecond);
     Logger.getInstance().recordOutput("Swerve/CommandedSpeeds/Omega", speeds.omegaRadiansPerSecond);
 
     // Twist computation.
-    double lookAheadSeconds = 0.1;
+    double lookAheadSeconds = 0.02;
     Pose2d target_pose =
         new Pose2d(
             lookAheadSeconds * speeds.vxMetersPerSecond,
@@ -284,65 +247,17 @@ public class SwerveSubsystem extends LifecycleSubsystem {
 
               boolean openLoop = true;
 
-              driveTeleop(
-                  -controller.getSidewaysPercentage(),
-                  controller.getForwardPercentage(),
-                  controller.getThetaPercentage(),
-                  true,
-                  openLoop);
+              double sidewaysPercentage = controller.getSidewaysPercentage();
+              double forwardPercentage = -1 * controller.getForwardPercentage();
+              double thetaPercentage = -1 * controller.getThetaPercentage();
+
+              Logger.getInstance().recordOutput("Joysticks/Sideways", sidewaysPercentage);
+              Logger.getInstance().recordOutput("Joysticks/Forward", forwardPercentage);
+              Logger.getInstance().recordOutput("Joysticks/Theta", thetaPercentage);
+
+              driveTeleop(sidewaysPercentage, forwardPercentage, thetaPercentage, true, openLoop);
             },
             this)
         .withName("SwerveDriveTeleop");
-  }
-
-  public Command getFollowTrajectoryCommand(
-      PathPlannerTrajectory traj, LocalizationSubsystem localization) {
-    return new PPSwerveControllerCommand(
-            traj,
-            localization::getPose,
-            SwerveSubsystem.KINEMATICS,
-            // x controller
-            xController,
-            // y controller
-            yController,
-            // theta controller
-            thetaController,
-            states -> setModuleStates(states, false, false),
-            false,
-            this)
-        .withName("SwerveFollowTrajectory");
-  }
-
-  // Create a command that accepts a Pose2d and drives to it using a PPHolonomicDriveController
-  // The command should exit once it's at the pose
-  public Command goToPoseCommand(Pose2d goal, LocalizationSubsystem localization) {
-    return run(() -> {
-          Logger.getInstance().recordOutput("AutoAlign/TargetPose", goal);
-          Pose2d pose = localization.getPose();
-          double xVelocity = xProfiledController.calculate(pose.getX(), goal.getX());
-          double yVelocity = yProfiledController.calculate(pose.getY(), goal.getY());
-          double thetaVelocity =
-              thetaProfiledController.calculate(
-                  pose.getRotation().getRadians(), goal.getRotation().getRadians());
-
-          ChassisSpeeds chassisSpeeds =
-              ChassisSpeeds.fromFieldRelativeSpeeds(
-                  xVelocity, yVelocity, thetaVelocity, pose.getRotation());
-
-          setChassisSpeeds(chassisSpeeds, false);
-        })
-        .until(
-            () -> {
-              // 3 degree rotation and 0.1 meter distance
-              Pose2d pose = localization.getPose();
-              double distanceRelative = goal.getTranslation().getDistance(pose.getTranslation());
-              Rotation2d rotationDifference = goal.getRotation().minus(pose.getRotation());
-              if (distanceRelative < 0.1 && Math.abs(rotationDifference.getDegrees()) < 3) {
-                return true;
-              } else {
-                return false;
-              }
-            })
-        .withName("SwerveGoToPose");
   }
 }

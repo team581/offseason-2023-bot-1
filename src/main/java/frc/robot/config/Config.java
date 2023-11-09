@@ -5,10 +5,10 @@
 package frc.robot.config;
 
 import com.pathplanner.lib.auto.PIDConstants;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import frc.robot.localization.VisionMode;
 import frc.robot.swerve.SwerveCorner;
 import frc.robot.swerve.SwerveModuleConstants;
 
@@ -26,7 +26,6 @@ public class Config {
   public static final int INTAKE_ID = 17;
   public static final int CANDLE_ID = 18;
 
-  public static final VisionMode VISION_MODE = VisionMode.ENABLED_UNUSED;
   public static final Translation2d SWERVE_FRONT_LEFT_LOCATION =
       new Translation2d(0.263525, 0.263525);
   public static final Translation2d SWERVE_FRONT_RIGHT_LOCATION =
@@ -52,18 +51,25 @@ public class Config {
   public static final double SWERVE_DRIVE_CURRENT_LIMIT = 35.0;
   public static final boolean SWERVE_DRIVE_LIMITS_ENABLE = true;
 
-  public static final double SWERVE_DRIVE_KP = 0.0;
+  public static final double SWERVE_DRIVE_KP = 0.24;
   public static final double SWERVE_DRIVE_KI = 0.0;
   public static final double SWERVE_DRIVE_KD = 0.0;
-  public static final double SWERVE_DRIVE_KV = 0.0;
+  public static final double SWERVE_DRIVE_KV = 0.1185;
   public static final double SWERVE_DRIVE_KS = 0.0;
 
   public static final double STEER_MOTOR_LIMITS = 35;
   public static final boolean SWERVE_MOTOR_LIMITS_ENABLED = true;
-  public static final PIDConstants SWERVE_TRANSLATION_PID = new PIDConstants(2.5, 0, 0);
-  public static final PIDConstants SWERVE_ROTATION_PID = new PIDConstants(4.5, 0, 0.1);
-  public static final PIDConstants SWERVE_ROTATION_SNAP_PID = new PIDConstants(7.5, 0, 1);
   public static final boolean SWERVE_USE_FOC = true;
+  // These PID values for translation and rotation (not snaps) are insane and almost seem like they don't actually influence the path following
+  // When you set PathPlanner to run at 3m/s and 3m/s/s it commands an insane speed, which can't be followed
+  // The result is that the robot is Fast Enough
+  // We don't have enough time to debug the issue more
+  public static final PIDConstants SWERVE_TRANSLATION_PID = new PIDConstants(12.5, 0, 0);
+  public static final PIDConstants SWERVE_ROTATION_PID = new PIDConstants(10, 0, 0.1);
+  public static final PIDConstants SWERVE_ROTATION_SNAP_PID = new PIDConstants(3, 0, 0);
+  public static final boolean SWERVE_TRANSLATION_PID_INVERT = true;
+  public static final boolean SWERVE_ROTATION_PID_INVERT = false;
+  public static final boolean SWERVE_ROTATION_SNAP_PID_INVERT = true;
 
   public static final int SWERVE_FL_DRIVE_MOTOR_ID = 2;
   public static final int SWERVE_FL_STEER_MOTOR_ID = 3;

@@ -40,7 +40,8 @@ public class LightsSubsystem extends LifecycleSubsystem {
     this.superstructure = superstructure;
   }
 
-  public void enabledPeriodic() {
+  @Override
+  public void robotPeriodic() {
     HeldGamePiece gamePiece = intake.getGamePiece();
     IntakeState intakeMode = intake.getIntakeState();
     HeldGamePiece superstructureMode = superstructure.getMode();
@@ -111,10 +112,7 @@ public class LightsSubsystem extends LifecycleSubsystem {
         candle.setLEDs(color8Bit.red, color8Bit.green, color8Bit.blue);
       }
     }
-  }
 
-  @Override
-  public void robotPeriodic() {
     Logger.getInstance().recordOutput("Lights/BlinkPattern", blinkPattern.toString());
     Logger.getInstance().recordOutput("Lights/Color", color.toString());
   }

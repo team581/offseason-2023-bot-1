@@ -73,6 +73,8 @@ public class SwerveModule {
 
     TalonFXConfiguration driveMotorConfigs = new TalonFXConfiguration();
 
+    driveMotorConfigs.Feedback.SensorToMechanismRatio = -1 * Config.SWERVE_DRIVE_GEARING_REDUCTION;
+
     driveMotorConfigs.Slot0.kP = Config.SWERVE_DRIVE_KP;
     driveMotorConfigs.Slot0.kI = Config.SWERVE_DRIVE_KI;
     driveMotorConfigs.Slot0.kD = Config.SWERVE_DRIVE_KD;
@@ -124,10 +126,19 @@ public class SwerveModule {
 
     steerMotor.setInverted(constants.angleInversion);
 
-    // steerMotor.burnFlash();
+    steerMotor.burnFlash();
   }
 
   public void log() {
+    Logger.getInstance()
+        .recordOutput(
+            "Swerve/" + constants.corner.toString() + "/DriveMotorPosition",
+            getDriveMotorPosition());
+    Logger.getInstance()
+        .recordOutput(
+            "Swerve/" + constants.corner.toString() + "/DriveMotorVelocity",
+            getDriveMotorVelocity());
+
     Logger.getInstance()
         .recordOutput(
             "Swerve/" + constants.corner.toString() + "/DriveMotorStatorCurrent",

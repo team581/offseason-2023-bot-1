@@ -162,7 +162,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
         .withName("IntakeShelfCommand");
   }
 
-  private Command stowFast() {
+  public Command stowFast() {
     return Commands.runOnce(
         () -> {
           setGoal(States.STOWED);
