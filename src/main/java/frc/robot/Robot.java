@@ -165,13 +165,8 @@ public class Robot extends LoggedRobot {
   private void configureButtonBindings() {
     swerve.setDefaultCommand(swerve.getDriveTeleopCommand(driveController));
 
-    // TODO: Start adding button bindings
-
     // Driver controls
-    // driveController.leftStick();
-    // driveController.rightStick();
     driveController.leftTrigger(0.3).onTrue(superstructure.getIntakeFloorCommand());
-    // driveController.leftBumper().onTrue(superstructure.getIntakeShelfCommand());
     driveController.rightTrigger(0.3).onTrue(superstructure.getScoreFinishCommand());
     driveController.rightBumper().onTrue(superstructure.getIntakeSingleSubstationCommand());
     driveController.back().onTrue(localization.getZeroCommand());
