@@ -4,8 +4,6 @@
 
 package frc.robot.swerve;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,6 +22,7 @@ import frc.robot.fms.FmsSubsystem;
 import frc.robot.imu.ImuSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
+import org.littletonrobotics.junction.Logger;
 
 public class SwerveSubsystem extends LifecycleSubsystem {
   private static final Translation2d FRONT_LEFT_LOCATION = Config.SWERVE_FRONT_LEFT_LOCATION;
@@ -250,7 +249,7 @@ public class SwerveSubsystem extends LifecycleSubsystem {
 
               double sidewaysPercentage = controller.getSidewaysPercentage();
               double forwardPercentage = -1 * controller.getForwardPercentage();
-              double thetaPercentage =-1* controller.getThetaPercentage();
+              double thetaPercentage = -1 * controller.getThetaPercentage();
 
               Logger.getInstance().recordOutput("Joysticks/Sideways", sidewaysPercentage);
               Logger.getInstance().recordOutput("Joysticks/Forward", forwardPercentage);
