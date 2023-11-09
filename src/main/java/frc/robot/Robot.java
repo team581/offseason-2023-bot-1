@@ -192,8 +192,14 @@ public class Robot extends LoggedRobot {
         .onFalse(swerve.disableXSwerveCommand());
 
     // Operator controls
-    operatorController.y().onTrue(superstructure.getScoreAlignCommand(() -> NodeHeight.HIGH));
-    operatorController.b().onTrue(superstructure.getScoreAlignCommand(() -> NodeHeight.MID));
+    operatorController
+        .y()
+        .onTrue(superstructure.getScoreAlignCommand(() -> NodeHeight.HIGH))
+        .onFalse(superstructure.setStateCommand(States.STOWED));
+    operatorController
+        .b()
+        .onTrue(superstructure.getScoreAlignCommand(() -> NodeHeight.MID))
+        .onFalse(superstructure.setStateCommand(States.STOWED));
     // A or X for stow
     operatorController
         .a()
