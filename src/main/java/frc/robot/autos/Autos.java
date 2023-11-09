@@ -149,6 +149,9 @@ public class Autos {
 
     if (Config.SWERVE_ROTATION_PID_INVERT) {
       rotationPid = new PIDConstants(rotationPid.kP * -1, rotationPid.kI, rotationPid.kD * -1);
+    }
+
+    if (Config.SWERVE_TRANSLATION_PID_INVERT) {
       translationPid =
           new PIDConstants(translationPid.kP * -1, translationPid.kI, translationPid.kD * -1);
     }
