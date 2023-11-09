@@ -26,6 +26,7 @@ public class IntakeSubsystem extends LifecycleSubsystem {
     super(SubsystemPriority.INTAKE);
     this.motor = motor;
     encoder = motor.getEncoder();
+    encoder.setPositionConversionFactor(1.0);
     encoder.setVelocityConversionFactor(1.0);
   }
 
@@ -87,10 +88,10 @@ public class IntakeSubsystem extends LifecycleSubsystem {
         gamePiece = HeldGamePiece.CONE;
       } else if (motorVelocity < threshold && goalState == IntakeState.INTAKE_CUBE) {
         gamePiece = HeldGamePiece.CUBE;
+      } else if (motorVelocity > threshold
+          && (goalState == IntakeState.OUTTAKE_CONE || goalState == IntakeState.OUTTAKE_CUBE)) {
+        gamePiece = HeldGamePiece.NOTHING;
       }
-    } else if (motorVelocity > threshold
-        && (goalState == IntakeState.OUTTAKE_CONE || goalState == IntakeState.OUTTAKE_CUBE)) {
-      gamePiece = HeldGamePiece.NOTHING;
     }
   }
 
