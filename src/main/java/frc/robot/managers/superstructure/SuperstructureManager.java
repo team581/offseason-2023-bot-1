@@ -4,6 +4,10 @@
 
 package frc.robot.managers.superstructure;
 
+import java.util.function.Supplier;
+
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.imu.ImuSubsystem;
@@ -14,8 +18,6 @@ import frc.robot.shoulder.ShoulderSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
 import frc.robot.wrist.WristSubsystem;
-import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 
 public class SuperstructureManager extends LifecycleSubsystem {
   private final ImuSubsystem imu;
@@ -237,8 +239,12 @@ public class SuperstructureManager extends LifecycleSubsystem {
                 () -> {
                   scoringHeight = null;
                   scoringProgress = ScoringProgress.DONE_SCORING;
+
+                  if (height.get() == NodeHeight.LOW) {
+                    // Auto stow after scoring low
+                    setGoal(States.STOWED);
+                  }
                 }))
-        .andThen(stowFast().unless(() -> height.get() != NodeHeight.LOW))
         .withName("ScoreFinishCommand");
   }
 }
