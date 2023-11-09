@@ -4,12 +4,18 @@
 
 package frc.robot;
 
+import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -39,10 +45,6 @@ import frc.robot.swerve.SwerveModule;
 import frc.robot.swerve.SwerveSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystemManager;
 import frc.robot.wrist.WristSubsystem;
-import org.littletonrobotics.junction.LoggedRobot;
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.NT4Publisher;
-import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -178,11 +180,11 @@ public class Robot extends LoggedRobot {
 
     driveController.povUp().onTrue(superstructure.setModeCommand(HeldGamePiece.CUBE));
     driveController.povDown().onTrue(superstructure.setModeCommand(HeldGamePiece.CONE));
-    // Snaps for all cardinal directions
-    driveController.x().onTrue(autoRotate.getCommand(() -> AutoRotate.getLeftAngle()));
-    driveController.b().onTrue(autoRotate.getCommand(() -> AutoRotate.getRightAngle()));
-    driveController.y().onTrue(autoRotate.getCommand(() -> AutoRotate.getForwardAngle()));
-    driveController.a().onTrue(autoRotate.getCommand(() -> AutoRotate.getBackwardsAngle()));
+    // Snaps for all cardinal directions - we treat the back of the robot as the front
+    driveController.b().onTrue(autoRotate.getCommand(() -> AutoRotate.getLeftAngle()));
+    driveController.x().onTrue(autoRotate.getCommand(() -> AutoRotate.getRightAngle()));
+    driveController.a().onTrue(autoRotate.getCommand(() -> AutoRotate.getForwardAngle()));
+    driveController.y().onTrue(autoRotate.getCommand(() -> AutoRotate.getBackwardsAngle()));
 
     new Trigger(() -> driveController.getThetaPercentage() == 0)
         .onFalse(autoRotate.getDisableCommand());
