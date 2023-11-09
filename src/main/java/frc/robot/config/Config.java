@@ -5,7 +5,6 @@
 package frc.robot.config;
 
 import com.pathplanner.lib.auto.PIDConstants;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -60,10 +59,12 @@ public class Config {
   public static final double STEER_MOTOR_LIMITS = 35;
   public static final boolean SWERVE_MOTOR_LIMITS_ENABLED = true;
   public static final boolean SWERVE_USE_FOC = true;
-  // These PID values for translation and rotation (not snaps) are insane and almost seem like they don't actually influence the path following
-  // When you set PathPlanner to run at 3m/s and 3m/s/s it commands an insane speed, which can't be followed
-  // The result is that the robot is Fast Enough
-  // We don't have enough time to debug the issue more
+  // These PID values for translation and rotation (not snaps) are insane and almost seem like they
+  // don't actually influence the path following.
+  // When you set PathPlanner to run at 3m/s and 3m/s/s it commands an insane speed, which can't be
+  // followed.
+  // The result is that the robot is Fast Enough.
+  // We don't have enough time to debug the issue more.
   public static final PIDConstants SWERVE_TRANSLATION_PID = new PIDConstants(12.5, 0, 0);
   public static final PIDConstants SWERVE_ROTATION_PID = new PIDConstants(10, 0, 0.1);
   public static final PIDConstants SWERVE_ROTATION_SNAP_PID = new PIDConstants(3, 0, 0);
