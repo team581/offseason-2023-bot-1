@@ -95,7 +95,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
   }
 
   public Command setIntakeOverrideCommand(IntakeState intakeState) {
-    return runOnce(
+    return Commands.runOnce(
             () -> {
               setIntakeOverride(intakeState);
             })
@@ -121,7 +121,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
   }
 
   public Command setModeCommand(HeldGamePiece mode) {
-    return runOnce(
+    return Commands.runOnce(
             () -> {
               setMode(mode);
             })
