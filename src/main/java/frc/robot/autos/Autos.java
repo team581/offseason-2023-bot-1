@@ -4,10 +4,22 @@
 
 package frc.robot.autos;
 
+import java.lang.ref.WeakReference;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
 import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.pathplanner.lib.server.PathPlannerServer;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -27,14 +39,6 @@ import frc.robot.managers.superstructure.States;
 import frc.robot.managers.superstructure.SuperstructureManager;
 import frc.robot.swerve.SwerveSubsystem;
 import frc.robot.wrist.WristSubsystem;
-import java.lang.ref.WeakReference;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class Autos {
   private static Command wrapAutoEvent(String commandName, Command command) {
@@ -140,14 +144,22 @@ public class Autos {
 
     eventMap = wrapAutoEventMap(eventMap);
 
+    PIDConstants rotationPid = Config.SWERVE_ROTATION_PID;
+    PIDConstants translationPid = Config.SWERVE_TRANSLATION_PID;
+
+    if (Config.SWERVE_ROTATION_PID_INVERT) {
+      rotationPid = new PIDConstants(rotationPid.kP * -1, rotationPid.kI, rotationPid.kD * -1);
+      translationPid =
+          new PIDConstants(translationPid.kP * -1, translationPid.kI, translationPid.kD * -1);
+    }
+
     autoBuilder =
         new SwerveAutoBuilder(
             localization::getPose,
             localization::resetPose,
-            SwerveSubsystem.KINEMATICS,
-            Config.SWERVE_TRANSLATION_PID,
-            Config.SWERVE_ROTATION_PID,
-            (states) -> swerve.setModuleStates(states, false, false),
+            translationPid,
+            rotationPid,
+            (states) -> swerve.setChassisSpeeds(states, false),
             eventMap,
             false,
             swerve);

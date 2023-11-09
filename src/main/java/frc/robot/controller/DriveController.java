@@ -5,8 +5,6 @@
 package frc.robot.controller;
 
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.autoscore.NodeKind;
-import frc.robot.managers.superstructure.NodeHeight;
 
 public class DriveController extends CommandXboxController {
   private boolean slowModeEnabled;
@@ -47,46 +45,5 @@ public class DriveController extends CommandXboxController {
   /** The rotation about the robot's z-axis as a percentage (<code>-1 <= x <= 1</code>) */
   public double getThetaPercentage() {
     return joystickScale(0.75 * getRightX());
-  }
-
-  public NodeKind getAutoScoreNodeKind() {
-    double rightX = getRightX();
-    double rightY = -getRightY();
-
-    NodeHeight scoringHeight;
-
-    if (rightY > 0.6) {
-      scoringHeight = NodeHeight.HIGH;
-    } else if (rightY < -0.7) {
-      scoringHeight = NodeHeight.LOW;
-    } else {
-      scoringHeight = NodeHeight.MID;
-    }
-
-    if (rightX < -0.6) {
-      if (scoringHeight == NodeHeight.LOW) {
-        return NodeKind.LEFT_HYBRID;
-      } else if (scoringHeight == NodeHeight.MID) {
-        return NodeKind.LEFT_MID_CONE;
-      } else if (scoringHeight == NodeHeight.HIGH) {
-        return NodeKind.LEFT_HIGH_CONE;
-      }
-    } else if (rightX > 0.6) {
-      if (scoringHeight == NodeHeight.LOW) {
-        return NodeKind.RIGHT_HYBRID;
-      } else if (scoringHeight == NodeHeight.MID) {
-        return NodeKind.RIGHT_MID_CONE;
-      } else if (scoringHeight == NodeHeight.HIGH) {
-        return NodeKind.RIGHT_HIGH_CONE;
-      }
-    }
-
-    if (scoringHeight == NodeHeight.LOW) {
-      return NodeKind.CENTER_HYBRID;
-    } else if (scoringHeight == NodeHeight.HIGH) {
-      return NodeKind.CENTER_HIGH_CUBE;
-    }
-
-    return NodeKind.CENTER_MID_CUBE;
   }
 }
