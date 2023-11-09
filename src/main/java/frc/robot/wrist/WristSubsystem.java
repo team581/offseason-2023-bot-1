@@ -33,6 +33,8 @@ public class WristSubsystem extends LifecycleSubsystem {
 
     encoder.setPosition(Rotation2d.fromDegrees(-74.0).getRotations());
     encoder.setPositionConversionFactor(1.0 / 40.9);
+
+    motor.burnFlash();
   }
 
   @Override

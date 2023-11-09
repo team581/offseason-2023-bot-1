@@ -38,6 +38,8 @@ public class ShoulderSubsystem extends LifecycleSubsystem {
 
     encoder.setPosition(Rotation2d.fromDegrees(15.2).getRotations());
     encoder.setPositionConversionFactor(1.0 / (280.0 / 3.0));
+
+    motor.burnFlash();
   }
 
   @Override

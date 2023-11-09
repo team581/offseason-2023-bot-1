@@ -4,7 +4,8 @@
 
 package frc.robot.intake;
 
-import com.revrobotics.*;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.util.scheduling.LifecycleSubsystem;
@@ -28,6 +29,8 @@ public class IntakeSubsystem extends LifecycleSubsystem {
     encoder = motor.getEncoder();
     encoder.setPositionConversionFactor(1.0);
     encoder.setVelocityConversionFactor(1.0);
+
+    motor.burnFlash();
   }
 
   public void setGoalState(IntakeState newState) {
