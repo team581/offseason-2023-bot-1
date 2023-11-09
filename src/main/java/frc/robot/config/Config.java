@@ -63,7 +63,7 @@ public class Config {
   public static final PIDConstants SWERVE_TRANSLATION_PID = new PIDConstants(2.5, 0, 0);
   public static final PIDConstants SWERVE_ROTATION_PID = new PIDConstants(2.5, 0, 0.1);
   public static final PIDConstants SWERVE_ROTATION_SNAP_PID = new PIDConstants(3, 0, 0);
-  public static final boolean SWERVE_TRANSLATION_PID_INVERT = false;
+  public static final boolean SWERVE_TRANSLATION_PID_INVERT = true;
   public static final boolean SWERVE_ROTATION_PID_INVERT = false;
   public static final boolean SWERVE_ROTATION_SNAP_PID_INVERT = true;
 
