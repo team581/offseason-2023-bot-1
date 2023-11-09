@@ -45,6 +45,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
   private void setGoal(SuperstructureState goalState) {
     this.goalState = goalState;
     if (goalState.equals(States.STOWED)) {
+      scoringHeight = null;
       scoringProgress = ScoringProgress.NOT_SCORING;
     }
   }
@@ -232,18 +233,18 @@ public class SuperstructureManager extends LifecycleSubsystem {
               scoringHeight = height.get();
               scoringProgress = ScoringProgress.PLACING;
             })
-        .andThen(setStateCommand(() -> getScoringState(height.get()).aligning))
-        .andThen(setStateCommand(() -> getScoringState(height.get()).scoring))
+        .andThen(setStateCommand(() -> getScoringState(scoringHeight).aligning))
+        .andThen(setStateCommand(() -> getScoringState(scoringHeight).scoring))
         .andThen(
             Commands.runOnce(
                 () -> {
-                  scoringHeight = null;
-                  scoringProgress = ScoringProgress.DONE_SCORING;
-
-                  if (height.get() == NodeHeight.LOW) {
+                  if (scoringHeight == NodeHeight.LOW) {
                     // Auto stow after scoring low
                     setGoal(States.STOWED);
                   }
+
+                  scoringHeight = null;
+                  scoringProgress = ScoringProgress.DONE_SCORING;
                 }))
         .withName("ScoreFinishCommand");
   }
