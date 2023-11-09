@@ -232,7 +232,10 @@ public class Autos {
 
     List<PathPlannerTrajectory> pathGroup = Paths.getInstance().getPath(auto);
 
-    autoCommand = autoCommand.andThen(autoBuilder.fullAuto(pathGroup));
+    autoCommand =
+        autoCommand
+            .andThen(superstructure.setStateCommand(States.STOWED))
+            .andThen(autoBuilder.fullAuto(pathGroup));
 
     if (auto.autoBalance) {
       autoCommand = autoCommand.andThen(this.autobalance.getCommand());
