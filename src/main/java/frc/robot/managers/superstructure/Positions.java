@@ -22,7 +22,7 @@ public class Positions {
   public static final SuperstructurePosition CUBE_NODE_MID =
       new SuperstructurePosition(Rotation2d.fromDegrees(28), Rotation2d.fromDegrees(68));
   public static final SuperstructurePosition CUBE_NODE_HIGH =
-      new SuperstructurePosition(Rotation2d.fromDegrees(100), Rotation2d.fromDegrees(190));
+      new SuperstructurePosition(Rotation2d.fromDegrees(100), Rotation2d.fromDegrees(187));
 
   public static final SuperstructurePosition INTAKING_CONE_FLOOR =
       new SuperstructurePosition(Rotation2d.fromDegrees(-32), Rotation2d.fromDegrees(-152));
