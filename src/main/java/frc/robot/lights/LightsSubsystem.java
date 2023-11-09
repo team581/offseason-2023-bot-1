@@ -38,6 +38,8 @@ public class LightsSubsystem extends LifecycleSubsystem {
     this.candle = candle;
     this.intake = intake;
     this.superstructure = superstructure;
+
+    blinkTimer.start();
   }
 
   @Override
