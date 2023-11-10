@@ -4,13 +4,15 @@
 
 package frc.robot.intake;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
+
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
-import org.littletonrobotics.junction.Logger;
 
 /** Add your docs here. */
 public class IntakeSubsystem extends LifecycleSubsystem {
@@ -66,9 +68,9 @@ public class IntakeSubsystem extends LifecycleSubsystem {
     } else if (goalState == IntakeState.OUTTAKE_CUBE) {
       motor.set(0.3);
     } else if (gamePiece == HeldGamePiece.CUBE) {
-      motor.set(-0.75);
+      motor.set(-1.0);
     } else if (gamePiece == HeldGamePiece.CONE) {
-      motor.set(-0.6);
+      motor.set(-0.8);
     } else if (goalState == IntakeState.INTAKE_CUBE) {
       motor.set(-0.6);
     } else if (goalState == IntakeState.INTAKE_CONE) {

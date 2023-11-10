@@ -8,7 +8,8 @@ public enum AutoKindWithoutTeam {
   DO_NOTHING(AutoKind.DO_NOTHING, AutoKind.DO_NOTHING),
   BUMP_SIDE_3(AutoKind.RED_BUMP_SIDE_3, AutoKind.BLUE_BUMP_SIDE_3),
   FLAT_SIDE_3(AutoKind.RED_FLAT_SIDE_3, AutoKind.BLUE_FLAT_SIDE_3),
-  TEST(AutoKind.TEST, AutoKind.TEST);
+  TEST(AutoKind.TEST, AutoKind.TEST),
+  TAXI_1(AutoKind.RED_TAXI_1, AutoKind.BLUE_TAXI_1);
 
   public final AutoKind redVersion;
   public final AutoKind blueVersion;

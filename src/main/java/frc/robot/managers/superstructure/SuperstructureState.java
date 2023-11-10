@@ -21,4 +21,18 @@ public class SuperstructureState {
   public SuperstructureState(SuperstructurePosition position, IntakeState intakeMode) {
     this(position, intakeMode, false);
   }
+
+    @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof SuperstructureState) {
+      SuperstructureState state = (SuperstructureState) obj;
+
+      return this == obj
+          || (position.equals(state.position)
+              && intakeState == state.intakeState
+              && intakeNow == state.intakeNow);
+    }
+
+    return false;
+  }
 }

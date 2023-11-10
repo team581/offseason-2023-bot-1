@@ -4,11 +4,22 @@
 
 package frc.robot.autos;
 
+import java.lang.ref.WeakReference;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.pathplanner.lib.server.PathPlannerServer;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -20,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.config.Config;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.intake.HeldGamePiece;
+import frc.robot.intake.IntakeState;
 import frc.robot.intake.IntakeSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.managers.autobalance.Autobalance;
@@ -28,14 +40,6 @@ import frc.robot.managers.superstructure.States;
 import frc.robot.managers.superstructure.SuperstructureManager;
 import frc.robot.swerve.SwerveSubsystem;
 import frc.robot.wrist.WristSubsystem;
-import java.lang.ref.WeakReference;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class Autos {
   private static Command wrapAutoEvent(String commandName, Command command) {
@@ -103,12 +107,13 @@ public class Autos {
                     () -> {
                       superstructure.setMode(HeldGamePiece.CONE);
                       intake.setGamePiece(HeldGamePiece.CONE);
+                      superstructure.setIntakeOverride(IntakeState.INTAKE_CONE);
                     })),
             Map.entry(
                 "scoreLow",
                 superstructure
                     .getScoreFinishCommand(() -> NodeHeight.LOW)
-                    .withTimeout(1)
+                    .withTimeout(3)
                     .andThen(Commands.runOnce(() -> intake.setGamePiece(HeldGamePiece.NOTHING)))),
             Map.entry(
                 "scoreMid",

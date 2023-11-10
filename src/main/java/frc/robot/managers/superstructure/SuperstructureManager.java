@@ -43,6 +43,10 @@ public class SuperstructureManager extends LifecycleSubsystem {
   }
 
   private void setGoal(SuperstructureState goalState) {
+    if (!this.goalState.equals(goalState)) {
+      manualIntakeState = null;
+    }
+
     this.goalState = goalState;
     if (goalState.equals(States.STOWED)) {
       scoringHeight = null;
@@ -110,7 +114,7 @@ public class SuperstructureManager extends LifecycleSubsystem {
   }
 
   public Command setStateCommand(Supplier<SuperstructureState> newGoalState) {
-    return Commands.runOnce(() -> setGoal(newGoalState.get()), wrist, shoulder)
+    return Commands.runOnce(() -> setGoal(newGoalState.get()), wrist, shoulder, intake)
         .andThen(Commands.waitUntil(() -> atGoal(newGoalState.get())))
         .withName("SetStateCommand");
   }
@@ -171,7 +175,8 @@ public class SuperstructureManager extends LifecycleSubsystem {
           setGoal(States.STOWED);
         },
         wrist,
-        shoulder);
+        shoulder,
+        intake);
   }
 
   public Command getIntakeSingleSubstationCommand() {
