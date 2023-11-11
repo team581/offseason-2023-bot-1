@@ -13,7 +13,7 @@ public enum AutoKind {
   BLUE_BUMP_SIDE_3("BlueLongSide3", 3, 3, false),
   RED_FLAT_SIDE_3("RedShortSide3", 3, 3, false),
   RED_BUMP_SIDE_3("RedLongSide3", 3, 3, false),
-  TEST("Test", 2, 2, false),
+  TEST("test", 2, 2, false),
   RED_TAXI_1("RedTaxi1", 2, 2, false),
   BLUE_TAXI_1("BlueTaxi1", 2, 2, false),
   BLUE_MID_1_BALANCE("BlueMid1Balance", 1.5, 2, true),
