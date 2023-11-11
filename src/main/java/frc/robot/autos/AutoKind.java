@@ -15,8 +15,9 @@ public enum AutoKind {
   RED_BUMP_SIDE_3("RedLongSide3", 3, 3, false),
   TEST("Test", 2, 2, false),
   RED_TAXI_1("RedTaxi1", 2, 2, false),
-  BLUE_TAXI_1("BlueTaxi1", 2, 2, false);
-
+  BLUE_TAXI_1("BlueTaxi1", 2, 2, false),
+  BLUE_MID_1_BALANCE("BlueMid1Balance", 2, 3, true),
+  RED_MID_1_BALANCE("RedMid1Balance", 2, 3, true);
   public final String pathName;
   public final PathConstraints constraints;
   public final boolean autoBalance;
