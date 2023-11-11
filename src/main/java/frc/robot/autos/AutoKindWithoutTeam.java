@@ -10,7 +10,8 @@ public enum AutoKindWithoutTeam {
   // FLAT_SIDE_3(AutoKind.RED_FLAT_SIDE_3, AutoKind.BLUE_FLAT_SIDE_3),
   // TEST(AutoKind.TEST, AutoKind.TEST),
   TAXI_1(AutoKind.RED_TAXI_1, AutoKind.BLUE_TAXI_1),
-  MID_1_BALANCE(AutoKind.RED_MID_1_BALANCE, AutoKind.BLUE_MID_1_BALANCE);
+  MID_1_BALANCE(AutoKind.RED_MID_1_BALANCE, AutoKind.BLUE_MID_1_BALANCE),
+  BUMP_SIDE_2(AutoKind.RED_BUMP_SIDE_2, AutoKind.BLUE_BUMP_SIDE_2);
 
   public final AutoKind redVersion;
   public final AutoKind blueVersion;
