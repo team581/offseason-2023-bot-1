@@ -22,7 +22,7 @@ public class SuperstructureState {
     this(position, intakeMode, false);
   }
 
-    @Override
+  @Override
   public boolean equals(Object obj) {
     if (obj instanceof SuperstructureState) {
       SuperstructureState state = (SuperstructureState) obj;

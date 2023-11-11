@@ -4,10 +4,6 @@
 
 package frc.robot.managers.superstructure;
 
-import java.util.function.Supplier;
-
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.imu.ImuSubsystem;
@@ -18,6 +14,8 @@ import frc.robot.shoulder.ShoulderSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
 import frc.robot.wrist.WristSubsystem;
+import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class SuperstructureManager extends LifecycleSubsystem {
   private final ImuSubsystem imu;

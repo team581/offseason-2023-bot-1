@@ -4,15 +4,13 @@
 
 package frc.robot.intake;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
-
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
+import org.littletonrobotics.junction.Logger;
 
 /** Add your docs here. */
 public class IntakeSubsystem extends LifecycleSubsystem {
