@@ -29,15 +29,25 @@ public class IntakeSubsystem extends LifecycleSubsystem {
     encoder = motor.getEncoder();
     encoder.setPositionConversionFactor(1.0);
     encoder.setVelocityConversionFactor(1.0);
-    motor.setSmartCurrentLimit(25);
+    motor.setSmartCurrentLimit(30);
 
     motor.burnFlash();
   }
 
   public void setGoalState(IntakeState newState) {
     if (goalState != newState) {
+      // Reset intake state when trying to intake
       if (newState == IntakeState.INTAKE_CONE || newState == IntakeState.INTAKE_CUBE) {
         gamePiece = HeldGamePiece.NOTHING;
+      }
+
+      // Assume we are holding a game piece after stow
+      if (goalState == IntakeState.INTAKE_CONE) {
+        gamePiece = HeldGamePiece.CONE;
+      }
+
+      if (goalState == IntakeState.INTAKE_CUBE) {
+        gamePiece = HeldGamePiece.CUBE;
       }
 
       intakeTimer.reset();
