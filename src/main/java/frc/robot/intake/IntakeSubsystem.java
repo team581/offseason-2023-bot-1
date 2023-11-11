@@ -56,6 +56,14 @@ public class IntakeSubsystem extends LifecycleSubsystem {
     Logger.getInstance().recordOutput("Intake/Current", motor.getOutputCurrent());
     Logger.getInstance().recordOutput("Intake/DutyCycleOutput", motor.getAppliedOutput());
     Logger.getInstance().recordOutput("Intake/Velocity", motor.getEncoder().getVelocity());
+
+    if (goalState == IntakeState.INTAKE_CONE && getGamePiece() == HeldGamePiece.CUBE) {
+      gamePiece = HeldGamePiece.NOTHING;
+    }
+
+    if (goalState == IntakeState.INTAKE_CUBE && getGamePiece() == HeldGamePiece.CONE) {
+      gamePiece = HeldGamePiece.NOTHING;
+    }
   }
 
   @Override
@@ -130,5 +138,9 @@ public class IntakeSubsystem extends LifecycleSubsystem {
 
   public void setGamePiece(HeldGamePiece gamePiece) {
     this.gamePiece = gamePiece;
+  }
+
+  public IntakeState getGoalState() {
+    return goalState;
   }
 }

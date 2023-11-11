@@ -42,13 +42,13 @@ public class SuperstructureManager extends LifecycleSubsystem {
     this.imu = imu;
   }
 
-  private void setGoal(SuperstructureState goalState) {
-    if (!this.goalState.equals(goalState)) {
+  private void setGoal(SuperstructureState newGoal) {
+    if (!this.goalState.equals(newGoal)) {
       manualIntakeState = null;
     }
 
-    this.goalState = goalState;
-    if (goalState.equals(States.STOWED)) {
+    this.goalState = newGoal;
+    if (newGoal == States.STOWED || newGoal.equals(States.STOWED)) {
       scoringHeight = null;
       scoringProgress = ScoringProgress.NOT_SCORING;
     }
@@ -66,6 +66,13 @@ public class SuperstructureManager extends LifecycleSubsystem {
       intake.setGoalState(manualIntakeState);
     } else if (motionManager.atPosition(goalState.position) || goalState.intakeNow) {
       intake.setGoalState(goalState.intakeState);
+    }
+
+    if (intake.getGoalState() == IntakeState.INTAKE_CONE
+        || intake.getGoalState() == IntakeState.INTAKE_CUBE
+        || intake.getGoalState() == IntakeState.MANUAL_INTAKE) {
+      scoringHeight = null;
+      scoringProgress = ScoringProgress.NOT_SCORING;
     }
   }
 
