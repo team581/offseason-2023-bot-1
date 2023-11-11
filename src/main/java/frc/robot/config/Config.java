@@ -5,6 +5,7 @@
 package frc.robot.config;
 
 import com.pathplanner.lib.auto.PIDConstants;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -15,7 +16,7 @@ public class Config {
   public static final String SERIAL_NUMBER = System.getenv("serialnum");
 
   // TODO: Change this to false during events
-  public static final boolean IS_DEVELOPMENT = true;
+  public static final boolean IS_DEVELOPMENT = false;
 
   public static final int SHOULDER_ID = 14;
   public static final int SHOULDER2_ID = 15;
