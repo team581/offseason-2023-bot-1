@@ -67,7 +67,10 @@ public class SuperstructureManager extends LifecycleSubsystem {
     } else if (motionManager.atPosition(goalState.position) || goalState.intakeNow) {
       intake.setGoalState(goalState.intakeState);
     }
+  }
 
+  @Override
+  public void teleopPeriodic() {
     if (intake.getGoalState() == IntakeState.INTAKE_CONE
         || intake.getGoalState() == IntakeState.INTAKE_CUBE
         || intake.getGoalState() == IntakeState.MANUAL_INTAKE) {
