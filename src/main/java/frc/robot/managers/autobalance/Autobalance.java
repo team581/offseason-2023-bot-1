@@ -44,6 +44,11 @@ public class Autobalance extends LifecycleSubsystem {
   @Override
   public void robotPeriodic() {
     averageRoll = Rotation2d.fromDegrees(autoBalanceFilter.calculate(ANGLE_THRESHOLD));
+
+    Logger.getInstance().recordOutput("Autobalance/AtGoal", atGoal());
+    Logger.getInstance().recordOutput("Autobalance/AverageRoll", averageRoll.getDegrees());
+    Logger.getInstance().recordOutput("Autobalance/AverageRoll", averageRoll.getDegrees());
+    Logger.getInstance().recordOutput("Autobalance/AutoTimer", autoTimer.get());
   }
 
   @Override
