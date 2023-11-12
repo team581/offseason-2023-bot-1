@@ -4,8 +4,6 @@
 
 package frc.robot.managers.autobalance;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,6 +16,7 @@ import frc.robot.imu.ImuSubsystem;
 import frc.robot.swerve.SwerveSubsystem;
 import frc.robot.util.scheduling.LifecycleSubsystem;
 import frc.robot.util.scheduling.SubsystemPriority;
+import org.littletonrobotics.junction.Logger;
 
 public class Autobalance extends LifecycleSubsystem {
   private final SwerveSubsystem swerve;
