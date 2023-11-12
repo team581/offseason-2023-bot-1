@@ -4,6 +4,8 @@
 
 package frc.robot.managers.autobalance;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -91,7 +93,7 @@ public class Autobalance extends LifecycleSubsystem {
 
   public Command getCommand() {
     return Commands.run(() -> setEnabled(true), swerve)
-        .until(() -> atGoal() || autoTimer.hasElapsed(14.8))
+        .until(() -> autoTimer.hasElapsed(14.8))
         .andThen(runOnce(() -> setEnabled(false)))
         .handleInterrupt(() -> setEnabled(false));
   }
