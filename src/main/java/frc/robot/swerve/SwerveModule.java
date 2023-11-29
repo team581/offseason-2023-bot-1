@@ -105,8 +105,6 @@ public class SwerveModule {
 
     driveMotorStatorCurrent = driveMotor.getStatorCurrent();
 
-    // TODO: super temporary, remove this after 10/31/2023
-    // steerMotor.restoreFactoryDefaults();
 
     steerMotorPID.setP(Config.SWERVE_STEER_KP);
     steerMotorPID.setI(Config.SWERVE_STEER_KI);
